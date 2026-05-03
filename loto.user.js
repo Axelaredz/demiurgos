@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         🎯 Stoloto ГЖЛТ — Сканер v5
+// @name         🎯 Stoloto 3
 // @namespace    https://stoloto.ru/
-// @version      5.0
-// @description  Интерактивный сканер билетов ГЖЛТ. Тема Dracula.
+// @version      5.5
+// @description  Интерактивный сканер билетов ГЖЛТ. Останавливается при заданном количестве совпадений (порог настраивается). Автоматически загружает другие билеты и продолжает сканирование. Тема Dracula.
 // @author       Expert JS Team
 // @match        https://www.stoloto.ru/gzhl/game*
 // @match        https://stoloto.ru/gzhl/game*
@@ -48,6 +48,10 @@
     let selectedNumbers = new Set(DEFAULT_NUMBERS);
     let lastResults     = [];
     let activeTicket    = null;
+    let isWaitingForLoad = false;
+    let autoLoadEnabled = true;
+    let stopThreshold   = 30;
+    let checkSingleRow  = false; // опция поиска в одной строке
 
     const PANEL_ID = 'slt-panel';
     const BTN_ID   = 'slt-trigger-btn';
@@ -156,8 +160,10 @@
         if (!tickets.length) { lastResults = []; return []; }
 
         const results = [];
+        let stopReason = null;
+        let stoppedTicket = null;
 
-        tickets.forEach(ticket => {
+        for (const ticket of tickets) {
             /* Номер билета */
             const idEl     = ticket.querySelector('[data-test-id="ticket-number"]');
             const rawId    = idEl ? idEl.textContent.trim() : '—';
@@ -176,7 +182,25 @@
             const matched = [...selectedNumbers]
                 .filter(t => numSet.has(t))
                 .sort((a, b) => a - b);
-            if (!matched.length) return;
+            if (!matched.length) continue;
+
+            /* Если включена опция "в одной строке", проверяем, что все matched числа лежат в одной строке билета */
+            if (checkSingleRow && matched.length > 0) {
+                /* Группируем числа по строкам (предполагаем 3 строки по 9 чисел) */
+                const rows = [];
+                for (let i = 0; i < validSpans.length; i += 9) {
+                    const rowSpans = validSpans.slice(i, i + 9);
+                    const rowSet = new Set(
+                        rowSpans.map(s => parseInt(s.textContent.trim(), 10)).filter(n => !isNaN(n))
+                    );
+                    rows.push(rowSet);
+                }
+                /* Проверяем, есть ли строка, содержащая все matched числа */
+                const allInOneRow = rows.some(rowSet =>
+                    matched.every(n => rowSet.has(n))
+                );
+                if (!allInOneRow) continue;
+            }
 
             const isFull = matched.length === selectedNumbers.size;
 
@@ -195,15 +219,90 @@
             });
 
             results.push({ ticket, ticketId, rawId, matched, count: matched.length, isFull });
-        });
+
+            /* Остановка сканирования, если все выбранные числа найдены */
+            if (isFull) {
+                stopReason = 'Все выбранные числа найдены';
+                stoppedTicket = ticket;
+                break;
+            }
+
+            /* Проверка на пороговое количество совпадений (stopThreshold) */
+            if (matched.length >= stopThreshold) {
+                stopReason = `≥${stopThreshold} совпадений`;
+                stoppedTicket = ticket;
+                break;
+            }
+        }
 
         results.sort((a, b) => b.count - a.count);
 
         /* Рамка вокруг лучшего билета */
         if (results.length) results[0].ticket.classList.add('slt-ticket-best');
 
+        /* Если сканирование остановлено, добавить информацию в results */
+        if (stopReason) {
+            results._stopReason = stopReason;
+            results._stoppedTicket = stoppedTicket;
+        }
+
         lastResults = results;
+
+        /* Если нет достижения порога и включена автозагрузка — нажимаем кнопку "Другие билеты" */
+        if (!stopReason && autoLoadEnabled && !isWaitingForLoad) {
+            clickLoadMoreAndRescan();
+        }
+
         return results;
+    }
+
+    /* ═══════════════════════════════════════════════════
+       ЗАГРУЗКА ДОПОЛНИТЕЛЬНЫХ БИЛЕТОВ И ПОВТОРНЫЙ СКАН
+    ═══════════════════════════════════════════════════ */
+    function clickLoadMoreAndRescan() {
+        const loadBtn = document.querySelector('button[data-test-id="other_ticket"]');
+        if (!loadBtn) {
+            console.log('Кнопка "Другие билеты" не найдена');
+            return;
+        }
+
+        isWaitingForLoad = true;
+        console.log('Нажимаем кнопку "Другие билеты"');
+
+        loadBtn.click();
+
+        /* Ожидаем появления новых билетов через MutationObserver */
+        const observer = new MutationObserver((mutations, obs) => {
+            const hasNewTickets = mutations.some(m =>
+                [...m.addedNodes].some(n =>
+                    n.nodeType === 1 && (
+                        n.matches?.('[data-test-id="ticket"]') ||
+                        n.querySelector?.('[data-test-id="ticket"]')
+                    )
+                )
+            );
+            if (hasNewTickets) {
+                obs.disconnect();
+                isWaitingForLoad = false;
+                console.log('Новые билеты загружены, запускаем сканирование');
+                setTimeout(() => {
+                    const res = scan();
+                    const body = document.getElementById('slt-results-body');
+                    if (body) renderResults(body, res);
+                }, 500);
+            }
+        });
+
+        observer.observe(document.body, { childList: true, subtree: true });
+
+        /* Таймаут на случай, если новые билеты не появятся */
+        setTimeout(() => {
+            observer.disconnect();
+            if (isWaitingForLoad) {
+                isWaitingForLoad = false;
+                console.log('Таймаут загрузки новых билетов');
+            }
+        }, 10000);
     }
 
     /* ═══════════════════════════════════════════════════
@@ -247,13 +346,46 @@
             flex-wrap: wrap;
             border-left: 3px solid ${D.purple};
         `;
-        summary.innerHTML =
+        let summaryHtml =
             `<span>🗂 Билетов: <b style="color:${D.green};">${results.length}</b></span>` +
             `<span>🎯 Чисел выбрано: <b style="color:${D.purple};">${selectedNumbers.size}</b></span>` +
             (fullCnt
                 ? `<span>⭐ Полных: <b style="color:${D.yellow};">${fullCnt}</b></span>`
                 : '');
+        if (results._stopReason) {
+            summaryHtml += `<span>🛑 Остановка: <b style="color:${D.red};">${results._stopReason}</b></span>`;
+        }
+        summary.innerHTML = summaryHtml;
         container.appendChild(summary);
+
+        /* Блок предупреждения об остановке */
+        if (results._stopReason && results._stoppedTicket) {
+            const stopAlert = document.createElement('div');
+            stopAlert.style.cssText = `
+                background: ${D.bgDarker};
+                border-left: 4px solid ${D.red};
+                border-radius: 6px;
+                padding: 10px 14px;
+                margin-bottom: 12px;
+                font-size: 12px;
+                color: ${D.fg};
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            `;
+            const ticketId = results._stoppedTicket.querySelector('[data-test-id="ticket-number"]')?.textContent.trim() || '—';
+            stopAlert.innerHTML = `
+                <span style="font-size:16px;">⚠️</span>
+                <div style="flex:1;">
+                    <div style="font-weight:700; color:${D.red};">Сканирование остановлено</div>
+                    <div style="color:${D.fgMuted}; margin-top:2px;">
+                        Найден билет с ≥${stopThreshold} совпадениями (билет <b style="color:${D.cyan};">${ticketId}</b>).
+                        Дальнейшие билеты не проверялись.
+                    </div>
+                </div>
+            `;
+            container.appendChild(stopAlert);
+        }
 
         /* Таблица */
         const tbl = document.createElement('table');
@@ -468,13 +600,7 @@
         head.innerHTML = `
             <div style="display:flex; align-items:center; gap:10px;">
                 <span style="font-size:14px; font-weight:700; color:${D.purple};">
-                    🎯 ГЖЛТ Сканер
-                </span>
-                <span style="
-                    font-size:10px; color:${D.comment};
-                    background:${D.curLine}; padding:2px 7px;
-                    border-radius:5px; letter-spacing:.5px;">
-                    Dracula
+                    🎯 Сканер
                 </span>
             </div>
             <div style="display:flex; gap:8px; align-items:center;">
@@ -493,7 +619,41 @@
                             width:13px; height:13px;
                             cursor:pointer; margin:0;
                         ">
-                    <span>Авто-скан</span>
+                    <span>Авто</span>
+                </label>
+
+                <!-- Чекбокс автозагрузки -->
+                <label style="
+                    display:flex; align-items:center; gap:6px;
+                    cursor:pointer; font-size:12px; color:${D.fgMuted};
+                    background:${D.curLine}; padding:4px 10px;
+                    border-radius:7px; border:1px solid ${D.borderDim};
+                    user-select:none;
+                ">
+                    <input type="checkbox" id="slt-autoload" checked
+                        style="
+                            accent-color:${D.purple};
+                            width:13px; height:13px;
+                            cursor:pointer; margin:0;
+                        ">
+                    <span>Автозагрузка</span>
+                </label>
+
+                <!-- Чекбокс поиска в одной строке -->
+                <label style="
+                    display:flex; align-items:center; gap:6px;
+                    cursor:pointer; font-size:12px; color:${D.fgMuted};
+                    background:${D.curLine}; padding:4px 10px;
+                    border-radius:7px; border:1px solid ${D.borderDim};
+                    user-select:none;
+                ">
+                    <input type="checkbox" id="slt-single-row"
+                        style="
+                            accent-color:${D.purple};
+                            width:13px; height:13px;
+                            cursor:pointer; margin:0;
+                        ">
+                    <span>В строке</span>
                 </label>
 
                 <!-- Кнопка Скан -->
@@ -544,7 +704,21 @@
                     ${selectedNumbers.size} выбрано
                 </span>
             </span>
-            <div style="display:flex; gap:6px;">
+            <div style="display:flex; gap:6px; align-items:center;">
+                <div style="display:flex; align-items:center; gap:4px; font-size:11px; color:${D.cyan};">
+                    <span>Порог:</span>
+                    <input type="number" id="slt-threshold" min="1" max="90" value="${stopThreshold}"
+                        style="
+                            width: 40px;
+                            background: ${D.curLine};
+                            border: 1px solid ${D.borderDim};
+                            color: ${D.fg};
+                            font-size: 11px;
+                            padding: 2px 4px;
+                            border-radius: 4px;
+                            text-align: center;
+                        ">
+                </div>
                 <button id="slt-nums-default" class="slt-hbtn" style="
                     background:${D.curLine}; color:${D.green};
                     border:1px solid ${D.borderDim}; font-size:11px; padding:3px 9px;">
@@ -615,6 +789,25 @@
 
         panel.querySelector('#slt-autoscan').addEventListener('change', function () {
             panel.dataset.autoscan = this.checked ? '1' : '0';
+        });
+
+        panel.querySelector('#slt-autoload').addEventListener('change', function () {
+            autoLoadEnabled = this.checked;
+        });
+
+        panel.querySelector('#slt-single-row').addEventListener('change', function () {
+            checkSingleRow = this.checked;
+            console.log(`Поиск в одной строке: ${checkSingleRow ? 'включен' : 'выключен'}`);
+        });
+
+        panel.querySelector('#slt-threshold').addEventListener('change', function () {
+            const val = parseInt(this.value, 10);
+            if (!isNaN(val) && val >= 1 && val <= 90) {
+                stopThreshold = val;
+                console.log(`Порог остановки изменён на ${stopThreshold}`);
+            } else {
+                this.value = stopThreshold;
+            }
         });
 
         panel.querySelector('#slt-nums-default').onclick = () => {
