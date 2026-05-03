@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         🎯 Stoloto 3
+// @name         🎯 Stoloto 3 — Сканер v5.8 (фикс строк + тема 70/20/10)
 // @namespace    https://stoloto.ru/
-// @version      5.5
-// @description  Интерактивный сканер билетов ГЖЛТ. Останавливается при заданном количестве совпадений (порог настраивается). Автоматически загружает другие билеты и продолжает сканирование. Тема Dracula.
+// @version      5.8
+// @description  Сканер ГЖЛТ. Группировка строк строго по 9 ячеек DOM. Порог по строкам, автозагрузка, тема Dracula 70/20/10.
 // @author       Expert JS Team
 // @match        https://www.stoloto.ru/gzhl/game*
 // @match        https://stoloto.ru/gzhl/game*
@@ -14,32 +14,23 @@
     'use strict';
 
     /* ═══════════════════════════════════════════════════
-       DRACULA PALETTE
+       ТЕМА 70/20/10 — баланс на базе Dracula
     ═══════════════════════════════════════════════════ */
-    const D = {
-        bg:         '#282a36',
-        bgDark:     '#1e1f29',
-        bgDarker:   '#191a24',
-        curLine:    '#44475a',
-        selection:  '#44475a',
-        comment:    '#6272a4',
-        fg:         '#f8f8f2',
-        fgMuted:    '#bfbfbf',
-        cyan:       '#8be9fd',
-        green:      '#50fa7b',
-        orange:     '#ffb86c',
-        pink:       '#ff79c6',
-        purple:     'yellow',
-        red:        '#ff5555',
-        yellow:     'red',
-        /* производные */
-        borderDim:  '#44475a',
-        borderBright: '#6272a4',
+    const THEME = {
+        bg:         '#282a36',  bgDark:     '#1e1f29',  bgDarker:   '#191a24',
+        text:       '#f8f8f2',  textMuted:  '#bfbfbf',  border:     '#44475a',
+        panel:      '#44475a',  hover:      '#6272a4',  selection:  '#44475a80',
+        primary:    '#bd93f9',  success:    '#50fa7b',  warning:    '#ffb86c',
+        danger:     '#ff5555',  info:       '#8be9fd',  highlight:  '#f1fa8c',
     };
 
-    /* ═══════════════════════════════════════════════════
-       ДЕФОЛТНЫЕ ЧИСЛА
-    ═══════════════════════════════════════════════════ */
+    const SEL = {
+        TICKET:  '[data-test-id="ticket"]',
+        NUMBER:  '[data-test-id="number"]',
+        TICKET_ID: '[data-test-id="ticket-number"]',
+        LOAD_BTN: 'button[data-test-id="other_ticket"]',
+    };
+
     const DEFAULT_NUMBERS = new Set([
         6, 11, 34, 45, 58, 67, 75, 82, 80, 81, 83, 46, 48, 39,
         1, 4, 2, 8, 14, 16, 23, 30, 38, 50, 52, 57, 61, 65, 70, 74
@@ -51,882 +42,321 @@
     let isWaitingForLoad = false;
     let autoLoadEnabled = true;
     let stopThreshold   = 30;
-    let checkSingleRow  = false; // опция поиска в одной строке
+    let checkSingleRow  = false;
 
     const PANEL_ID = 'slt-panel';
     const BTN_ID   = 'slt-trigger-btn';
 
     /* ═══════════════════════════════════════════════════
-       ГЛОБАЛЬНЫЕ СТИЛИ
+       СТИЛИ
     ═══════════════════════════════════════════════════ */
     GM_addStyle(`
-        #${PANEL_ID} * {
-            box-sizing: border-box;
-            font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
-        }
-
-        /* Скроллбар */
+        #${PANEL_ID} * { box-sizing: border-box; font-family: 'JetBrains Mono', 'Fira Code', monospace; }
         #${PANEL_ID} ::-webkit-scrollbar { width: 5px; height: 5px; }
-        #${PANEL_ID} ::-webkit-scrollbar-track { background: ${D.bgDarker}; }
-        #${PANEL_ID} ::-webkit-scrollbar-thumb {
-            background: ${D.comment};
-            border-radius: 4px;
-        }
+        #${PANEL_ID} ::-webkit-scrollbar-track { background: ${THEME.bgDarker}; }
+        #${PANEL_ID} ::-webkit-scrollbar-thumb { background: ${THEME.border}; border-radius: 4px; }
 
-        /* Кнопки чисел */
         .slt-num-btn {
-            width: 100%;
-            aspect-ratio: 1;
-            border-radius: 6px;
-            border: 1px solid ${D.borderDim};
-            background: ${D.curLine};
-            color: ${D.fgMuted};
-            font-size: 11px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all .13s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            user-select: none;
-            padding: 0;
+            width: 100%; aspect-ratio: 1; border-radius: 6px;
+            border: 1px solid ${THEME.border}; background: ${THEME.panel};
+            color: ${THEME.textMuted}; font-size: 11px; font-weight: 600;
+            cursor: pointer; transition: all .13s ease;
+            display: flex; align-items: center; justify-content: center;
+            user-select: none; padding: 0;
         }
-        .slt-num-btn:hover {
-            border-color: ${D.purple};
-            color: ${D.fg};
-            background: ${D.selection};
-        }
+        .slt-num-btn:hover { border-color: ${THEME.hover}; color: ${THEME.text}; background: ${THEME.selection}; }
         .slt-num-btn.active {
-            background: ${D.purple};
-            border-color: ${D.purple};
-            color: ${D.bgDark};
-            font-weight: 800
+            background: ${THEME.primary}; border-color: ${THEME.primary};
+            color: ${THEME.bgDark}; font-weight: 800; box-shadow: 0 0 0 2px ${THEME.primary}40;
         }
 
-        /* Строки таблицы */
         .slt-row { cursor: pointer; transition: background .13s; }
-        .slt-row:hover td { background: ${D.selection} !important; }
-        .slt-row.slt-row-active td {
-            background: ${D.comment}33 !important;
-            outline: 1px solid ${D.cyan};
-        }
+        .slt-row:hover td { background: ${THEME.selection} !important; }
+        .slt-row.slt-row-active td { background: ${THEME.hover}33 !important; outline: 1px solid ${THEME.info}; }
 
-        /* Выделение билетов в DOM */
-        .slt-ticket-best {
-            outline: 3px solid ${D.yellow} !important;
-            outline-offset: 4px;
-            position: relative;
-            z-index: 10;
-        }
-        .slt-ticket-selected {
-            outline: 3px solid ${D.cyan} !important;
-            outline-offset: 4px;
-            border-radius: 8px;
-            position: relative;
-            z-index: 9;
-        }
+        .slt-ticket-best { outline: 3px solid ${THEME.highlight} !important; outline-offset: 4px; position: relative; z-index: 10; box-shadow: 0 0 20px ${THEME.highlight}30; }
+        .slt-ticket-selected { outline: 3px solid ${THEME.info} !important; outline-offset: 4px; border-radius: 8px; position: relative; z-index: 9; }
 
-        /* Кнопки шапки */
-        .slt-hbtn {
-            border-radius: 7px;
-            padding: 4px 12px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all .15s;
-            font-family: inherit;
-        }
-        .slt-hbtn:hover { filter: brightness(1.18); transform: translateY(-1px); }
+        .slt-hbtn { border-radius: 7px; padding: 4px 12px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all .15s; font-family: inherit; border: 1px solid ${THEME.border}; background: ${THEME.panel}; color: ${THEME.textMuted}; }
+        .slt-hbtn:hover { filter: brightness(1.1); transform: translateY(-1px); }
         .slt-hbtn:active { transform: translateY(0); }
+        .slt-hbtn--primary { background: ${THEME.primary}; color: ${THEME.bgDark}; border-color: ${THEME.primary}; font-weight: 700; }
+        .slt-hbtn--danger { color: ${THEME.danger}; border-color: ${THEME.danger}66; }
+        .slt-hbtn--success { color: ${THEME.success}; border-color: ${THEME.success}66; }
+        .slt-hbtn--warning { color: ${THEME.warning}; border-color: ${THEME.warning}66; }
+
+        .slt-num-hit { font-weight: 800; transition: all .2s; border-radius: 3px; padding: 0 3px; margin: 0 1px; }
+        .slt-num-hit.full { background: ${THEME.highlight}; color: ${THEME.bgDark}; box-shadow: 0 0 0 2px ${THEME.highlight}60; }
+        .slt-num-hit.partial { background: ${THEME.primary}; color: ${THEME.bgDark}; }
+
+        .slt-summary { background: ${THEME.panel}; border-radius: 8px; padding: 8px 13px; margin-bottom: 10px; font-size: 12px; color: ${THEME.textMuted}; display: flex; gap: 16px; flex-wrap: wrap; border-left: 3px solid ${THEME.primary}; }
+        .slt-stop-alert { background: ${THEME.bgDarker}; border-left: 4px solid ${THEME.danger}; border-radius: 6px; padding: 10px 14px; margin-bottom: 12px; font-size: 12px; color: ${THEME.text}; display: flex; align-items: center; gap: 10px; }
+        .slt-control { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 12px; color: ${THEME.textMuted}; background: ${THEME.panel}; padding: 4px 10px; border-radius: 7px; border: 1px solid ${THEME.border}; user-select: none; }
+        .slt-control input { accent-color: ${THEME.primary}; width: 13px; height: 13px; cursor: pointer; margin: 0; }
+        .slt-input { width: 40px; background: ${THEME.bgDark}; border: 1px solid ${THEME.border}; color: ${THEME.text}; font-size: 11px; padding: 2px 4px; border-radius: 4px; text-align: center; }
     `);
 
     /* ═══════════════════════════════════════════════════
-       СКАНИРОВАНИЕ
+       СКАНИРОВАНИЕ — фикс группировки по 9 ячеек
     ═══════════════════════════════════════════════════ */
     function scan() {
-        /* Сброс выделений */
-        document.querySelectorAll('.slt-ticket-best, .slt-ticket-selected').forEach(el =>
-            el.classList.remove('slt-ticket-best', 'slt-ticket-selected')
-        );
-        document.querySelectorAll('[data-test-id="number"][data-slt-hit]').forEach(s => {
-            s.removeAttribute('data-slt-hit');
-            s.style.cssText = '';
-        });
-        activeTicket = null;
+        cleanupHighlights();
+        if (!selectedNumbers.size) return { results: [], stopReason: null, stoppedTicket: null };
 
-        if (!selectedNumbers.size) { lastResults = []; return []; }
-
-        const tickets = document.querySelectorAll('[data-test-id="ticket"]');
-        if (!tickets.length) { lastResults = []; return []; }
+        const tickets = document.querySelectorAll(SEL.TICKET);
+        if (!tickets.length) return { results: [], stopReason: null, stoppedTicket: null };
 
         const results = [];
         let stopReason = null;
         let stoppedTicket = null;
 
         for (const ticket of tickets) {
-            /* Номер билета */
-            const idEl     = ticket.querySelector('[data-test-id="ticket-number"]');
-            const rawId    = idEl ? idEl.textContent.trim() : '—';
+            const idEl = ticket.querySelector(SEL.TICKET_ID);
+            const rawId = idEl ? idEl.textContent.trim() : '—';
             const ticketId = rawId.replace(/[^0-9]/g, '') || rawId;
 
-            /* Числа билета */
-            const spans      = [...ticket.querySelectorAll('[data-test-id="number"]')];
-            const validSpans = spans.filter(s => s.textContent.trim() !== '');
-            const numSet     = new Set(
-                validSpans
-                    .map(s => parseInt(s.textContent.trim(), 10))
-                    .filter(n => !isNaN(n))
-            );
+            // Берём ВСЕ ячейки подряд, так как они строго по 9 на строку
+            const allSpans = [...ticket.querySelectorAll(SEL.NUMBER)];
+            if (allSpans.length < 9) continue;
 
-            /* Сравнение */
-            const matched = [...selectedNumbers]
-                .filter(t => numSet.has(t))
-                .sort((a, b) => a - b);
-            if (!matched.length) continue;
+            const ticketNumSet = new Set();
+            allSpans.forEach(s => {
+                const n = parseInt(s.textContent.trim(), 10);
+                if (!isNaN(n)) ticketNumSet.add(n);
+            });
 
-            /* Если включена опция "в одной строке", проверяем, что все matched числа лежат в одной строке билета */
-            if (checkSingleRow && matched.length > 0) {
-                /* Группируем числа по строкам (предполагаем 3 строки по 9 чисел) */
-                const rows = [];
-                for (let i = 0; i < validSpans.length; i += 9) {
-                    const rowSpans = validSpans.slice(i, i + 9);
-                    const rowSet = new Set(
-                        rowSpans.map(s => parseInt(s.textContent.trim(), 10)).filter(n => !isNaN(n))
-                    );
-                    rows.push(rowSet);
+            const allMatched = [...selectedNumbers].filter(n => ticketNumSet.has(n)).sort((a, b) => a - b);
+            if (!allMatched.length) continue;
+
+            let matched = allMatched;
+            let matchCount = allMatched.length;
+
+            /* ── ЛОГИКА «ПОРОГ В ОДНОЙ СТРОКЕ» ── */
+            if (checkSingleRow) {
+                let bestRowMatches = [];
+
+                // Режем DOM ровно по 9 элементов на строку
+                for (let i = 0; i < allSpans.length; i += 9) {
+                    const rowSpans = allSpans.slice(i, i + 9);
+                    const rowNumSet = new Set();
+                    rowSpans.forEach(s => {
+                        const n = parseInt(s.textContent.trim(), 10);
+                        if (!isNaN(n)) rowNumSet.add(n);
+                    });
+
+                    const rowMatches = [...selectedNumbers].filter(n => rowNumSet.has(n));
+                    if (rowMatches.length > bestRowMatches.length) bestRowMatches = rowMatches;
                 }
-                /* Проверяем, есть ли строка, содержащая все matched числа */
-                const allInOneRow = rows.some(rowSet =>
-                    matched.every(n => rowSet.has(n))
-                );
-                if (!allInOneRow) continue;
+
+                if (bestRowMatches.length < stopThreshold) continue;
+                matched = bestRowMatches.sort((a, b) => a - b);
+                matchCount = matched.length;
             }
 
             const isFull = matched.length === selectedNumbers.size;
 
-            /* Подсветка чисел в билете */
-            validSpans.forEach(span => {
+            // Подсветка только тех чисел, что вошли в matched
+            allSpans.forEach(span => {
                 const val = parseInt(span.textContent.trim(), 10);
-                if (selectedNumbers.has(val)) {
+                if (!isNaN(val) && matched.includes(val)) {
                     span.setAttribute('data-slt-hit', '1');
-                    Object.assign(span.style, {
-                        background   : isFull ? D.yellow  : D.purple,
-                        color        : isFull ? D.bgDark  : D.bgDark,
-                        fontWeight   : '800',
-                        transition   : 'all .2s',
-                    });
+                    span.classList.add('slt-num-hit', isFull ? 'full' : 'partial');
                 }
             });
 
-            results.push({ ticket, ticketId, rawId, matched, count: matched.length, isFull });
+            results.push({ ticket, ticketId, rawId, matched, count: matchCount, isFull });
 
-            /* Остановка сканирования, если все выбранные числа найдены */
-            if (isFull) {
-                stopReason = 'Все выбранные числа найдены';
-                stoppedTicket = ticket;
-                break;
-            }
-
-            /* Проверка на пороговое количество совпадений (stopThreshold) */
-            if (matched.length >= stopThreshold) {
-                stopReason = `≥${stopThreshold} совпадений`;
-                stoppedTicket = ticket;
-                break;
+            if (isFull) { stopReason = 'Все выбранные числа найдены'; stoppedTicket = ticket; break; }
+            if (matchCount >= stopThreshold) {
+                stopReason = checkSingleRow ? `≥${stopThreshold} в одной строке` : `≥${stopThreshold} совпадений`;
+                stoppedTicket = ticket; break;
             }
         }
 
         results.sort((a, b) => b.count - a.count);
-
-        /* Рамка вокруг лучшего билета */
         if (results.length) results[0].ticket.classList.add('slt-ticket-best');
 
-        /* Если сканирование остановлено, добавить информацию в results */
-        if (stopReason) {
-            results._stopReason = stopReason;
-            results._stoppedTicket = stoppedTicket;
-        }
-
         lastResults = results;
+        const payload = { results, stopReason, stoppedTicket };
 
-        /* Если нет достижения порога и включена автозагрузка — нажимаем кнопку "Другие билеты" */
-        if (!stopReason && autoLoadEnabled && !isWaitingForLoad) {
-            clickLoadMoreAndRescan();
-        }
-
-        return results;
+        if (!stopReason && autoLoadEnabled && !isWaitingForLoad) clickLoadMoreAndRescan();
+        return payload;
     }
 
     /* ═══════════════════════════════════════════════════
-       ЗАГРУЗКА ДОПОЛНИТЕЛЬНЫХ БИЛЕТОВ И ПОВТОРНЫЙ СКАН
+       ЗАГРУЗКА БИЛЕТОВ
     ═══════════════════════════════════════════════════ */
     function clickLoadMoreAndRescan() {
-        const loadBtn = document.querySelector('button[data-test-id="other_ticket"]');
-        if (!loadBtn) {
-            console.log('Кнопка "Другие билеты" не найдена');
-            return;
-        }
+        const loadBtn = document.querySelector(SEL.LOAD_BTN);
+        if (!loadBtn) return;
 
-        isWaitingForLoad = true;
-        console.log('Нажимаем кнопку "Другие билеты"');
-
-        loadBtn.click();
-
-        /* Ожидаем появления новых билетов через MutationObserver */
+        isWaitingForLoad = true; loadBtn.click();
+        let timeoutId = null;
         const observer = new MutationObserver((mutations, obs) => {
-            const hasNewTickets = mutations.some(m =>
-                [...m.addedNodes].some(n =>
-                    n.nodeType === 1 && (
-                        n.matches?.('[data-test-id="ticket"]') ||
-                        n.querySelector?.('[data-test-id="ticket"]')
-                    )
-                )
-            );
-            if (hasNewTickets) {
-                obs.disconnect();
-                isWaitingForLoad = false;
-                console.log('Новые билеты загружены, запускаем сканирование');
-                setTimeout(() => {
-                    const res = scan();
-                    const body = document.getElementById('slt-results-body');
-                    if (body) renderResults(body, res);
-                }, 500);
-            }
+            const hasNew = mutations.some(m => [...m.addedNodes].some(n => n.nodeType === 1 && (n.matches?.(SEL.TICKET) || n.querySelector?.(SEL.TICKET))));
+            if (!hasNew) return;
+            obs.disconnect(); if (timeoutId) clearTimeout(timeoutId);
+            isWaitingForLoad = false;
+            setTimeout(() => {
+                const { results } = scan();
+                const body = document.getElementById('slt-results-body');
+                if (body) renderResults(body, results);
+            }, 300);
         });
-
         observer.observe(document.body, { childList: true, subtree: true });
-
-        /* Таймаут на случай, если новые билеты не появятся */
-        setTimeout(() => {
-            observer.disconnect();
-            if (isWaitingForLoad) {
-                isWaitingForLoad = false;
-                console.log('Таймаут загрузки новых билетов');
-            }
-        }, 10000);
+        timeoutId = setTimeout(() => { observer.disconnect(); if (isWaitingForLoad) isWaitingForLoad = false; }, 10000);
     }
 
     /* ═══════════════════════════════════════════════════
-       РЕНДЕР РЕЗУЛЬТАТОВ
+       РЕНДЕР
     ═══════════════════════════════════════════════════ */
     function renderResults(container, results) {
-        container.innerHTML = '';
-
-        /* Обновляем счётчик выбранных */
+        if (!container) return; container.innerHTML = '';
         const selCountEl = document.getElementById('slt-sel-count');
         if (selCountEl) selCountEl.textContent = `${selectedNumbers.size} выбрано`;
 
-        if (!results.length) {
-            container.innerHTML = `
-                <div style="
-                    text-align:center; padding:30px 20px;
-                    color:${D.comment}; line-height:2;
-                ">
-                    <div style="font-size:32px; margin-bottom:8px;">🧛</div>
-                    <div style="color:${D.fgMuted};">Совпадений не найдено.</div>
-                    <div style="font-size:11px; color:${D.comment}; margin-top:4px;">
-                        Выберите числа и нажмите
-                        <b style="color:${D.purple};">▶ Скан</b>
-                    </div>
-                </div>`;
+        if (!results?.length) {
+            container.innerHTML = `<div style="text-align:center;padding:30px 20px;color:${THEME.textMuted};line-height:2"><div style="font-size:32px;margin-bottom:8px">🧛</div><div style="color:${THEME.text}">Совпадений не найдено.</div><div style="font-size:11px;color:${THEME.textMuted};margin-top:4px">Выберите числа и нажмите <b style="color:${THEME.primary}">▶ Скан</b></div></div>`;
             return;
         }
 
-        /* Сводка */
         const fullCnt = results.filter(r => r.isFull).length;
-        const summary = document.createElement('div');
-        summary.style.cssText = `
-            background: ${D.curLine};
-            border-radius: 8px;
-            padding: 8px 13px;
-            margin-bottom: 10px;
-            font-size: 12px;
-            color: ${D.fgMuted};
-            display: flex;
-            gap: 16px;
-            flex-wrap: wrap;
-            border-left: 3px solid ${D.purple};
-        `;
-        let summaryHtml =
-            `<span>🗂 Билетов: <b style="color:${D.green};">${results.length}</b></span>` +
-            `<span>🎯 Чисел выбрано: <b style="color:${D.purple};">${selectedNumbers.size}</b></span>` +
-            (fullCnt
-                ? `<span>⭐ Полных: <b style="color:${D.yellow};">${fullCnt}</b></span>`
-                : '');
-        if (results._stopReason) {
-            summaryHtml += `<span>🛑 Остановка: <b style="color:${D.red};">${results._stopReason}</b></span>`;
-        }
-        summary.innerHTML = summaryHtml;
-        container.appendChild(summary);
+        const summary = document.createElement('div'); summary.className = 'slt-summary';
+        let html = `<span>🗂 Билетов: <b style="color:${THEME.success}">${results.length}</b></span><span>🎯 Чисел: <b style="color:${THEME.primary}">${selectedNumbers.size}</b></span>`;
+        if (fullCnt) html += `<span>⭐ Полных: <b style="color:${THEME.highlight}">${fullCnt}</b></span>`;
+        if (results.stopReason) html += `<span>🛑 Остановка: <b style="color:${THEME.danger}">${results.stopReason}</b></span>`;
+        summary.innerHTML = html; container.appendChild(summary);
 
-        /* Блок предупреждения об остановке */
-        if (results._stopReason && results._stoppedTicket) {
-            const stopAlert = document.createElement('div');
-            stopAlert.style.cssText = `
-                background: ${D.bgDarker};
-                border-left: 4px solid ${D.red};
-                border-radius: 6px;
-                padding: 10px 14px;
-                margin-bottom: 12px;
-                font-size: 12px;
-                color: ${D.fg};
-                display: flex;
-                align-items: center;
-                gap: 10px;
-            `;
-            const ticketId = results._stoppedTicket.querySelector('[data-test-id="ticket-number"]')?.textContent.trim() || '—';
-            stopAlert.innerHTML = `
-                <span style="font-size:16px;">⚠️</span>
-                <div style="flex:1;">
-                    <div style="font-weight:700; color:${D.red};">Сканирование остановлено</div>
-                    <div style="color:${D.fgMuted}; margin-top:2px;">
-                        Найден билет с ≥${stopThreshold} совпадениями (билет <b style="color:${D.cyan};">${ticketId}</b>).
-                        Дальнейшие билеты не проверялись.
-                    </div>
-                </div>
-            `;
-            container.appendChild(stopAlert);
+        if (results.stopReason && results.stoppedTicket) {
+            const alert = document.createElement('div'); alert.className = 'slt-stop-alert';
+            const tid = results.stoppedTicket.querySelector(SEL.TICKET_ID)?.textContent.trim() || '—';
+            alert.innerHTML = `<span style="font-size:16px">⚠️</span><div style="flex:1"><div style="font-weight:700;color:${THEME.danger}">Сканирование остановлено</div><div style="color:${THEME.textMuted};margin-top:2px">Найдено ≥${stopThreshold} совпадений в строке (билет <b style="color:${THEME.info}">${tid}</b>).</div></div>`;
+            container.appendChild(alert);
         }
 
-        /* Таблица */
-        const tbl = document.createElement('table');
-        tbl.style.cssText = 'width:100%; border-collapse:collapse;';
-        tbl.innerHTML = `
-            <thead>
-                <tr style="background:${D.bgDarker}; font-size:12px; color:${D.comment};">
-                    <th style="padding:7px 6px 7px 10px; text-align:left; font-weight:600;">#</th>
-                    <th style="padding:7px 6px; text-align:left; font-weight:600;">Номер билета</th>
-                    <th style="padding:7px 6px; text-align:center; font-weight:600;">Совп.</th>
-                    <th style="padding:7px 10px 7px 6px; text-align:left; font-weight:600;">Числа</th>
-                </tr>
-            </thead>
-            <tbody id="slt-tbody"></tbody>
-        `;
-        container.appendChild(tbl);
-        const tbody = tbl.querySelector('#slt-tbody');
+        const tbl = document.createElement('table'); tbl.style.cssText = 'width:100%;border-collapse:collapse';
+        tbl.innerHTML = `<thead><tr style="background:${THEME.bgDarker};font-size:12px;color:${THEME.textMuted}"><th style="padding:7px 6px 7px 10px;text-align:left;font-weight:600">#</th><th style="padding:7px 6px;text-align:left;font-weight:600">Номер билета</th><th style="padding:7px 6px;text-align:center;font-weight:600">Совп.</th><th style="padding:7px 10px 7px 6px;text-align:left;font-weight:600">Числа</th></tr></thead><tbody id="slt-tbody"></tbody>`;
+        container.appendChild(tbl); const tbody = tbl.querySelector('#slt-tbody');
 
         results.forEach((r, i) => {
-            const baseBg  = i % 2 === 0 ? D.bg : D.bgDark;
-            const ratio   = r.count / selectedNumbers.size;
-
-            const countColor = r.isFull   ? D.yellow
-                             : ratio >= .6 ? D.green
-                             : ratio >= .3 ? D.orange
-                             :               D.cyan;
-
-            const numsHtml = r.matched.map(n =>
-                `<span style="
-                    background:${D.bgDarker};
-                    color:${D.purple};
-                    border:1px solid ${D.comment};
-                    padding:1px 5px;
-                    border-radius:5px;
-                    margin:1px;
-                    display:inline-block;
-                    font-size:11px;
-                    font-weight:700;">${n}</span>`
-            ).join('');
-
-            const tr = document.createElement('tr');
-            tr.className = 'slt-row';
-            tr.style.cssText = `
-                background: ${baseBg};
-                ${i === 0 ? `border-left: 3px solid ${D.yellow};` : ''}
-            `;
-
-            tr.innerHTML = `
-                <td style="padding:7px 6px 7px 10px; color:${D.comment}; font-size:11px;">
-                    ${i + 1}
-                </td>
-                <td style="padding:7px 6px;">
-                    <span style="
-                        font-weight:700; font-size:12px;
-                        color:${r.isFull ? D.yellow : D.fg};">
-                        ${r.ticketId}
-                    </span>
-                    ${r.isFull
-                        ? `<span style="
-                                margin-left:5px; font-size:9px; font-weight:700;
-                                background:${D.yellow}; color:${D.bgDark};
-                                padding:1px 5px; border-radius:4px;">★ ПОЛНОЕ</span>`
-                        : ''}
-                    ${i === 0
-                        ? `<span style="
-                                margin-left:5px; font-size:9px; font-weight:700;
-                                background:${D.purple}; color:${D.bgDark};
-                                padding:1px 5px; border-radius:4px;">👑 ТОП</span>`
-                        : ''}
-                </td>
-                <td style="padding:7px 6px; text-align:center;">
-                    <span style="
-                        background:${D.bgDarker};
-                        color:${countColor};
-                        border:1px solid ${countColor}66;
-                        padding:2px 10px;
-                        border-radius:10px;
-                        font-weight:700;
-                        font-size:12px;">
-                        ${r.count}/${selectedNumbers.size}
-                    </span>
-                </td>
-                <td style="padding:7px 10px 7px 6px; line-height:2;">${numsHtml}</td>
-            `;
-
-            tr.onclick = () => selectTicketRow(r, tr, results);
-            tbody.appendChild(tr);
+            const baseBg = i % 2 === 0 ? THEME.bg : THEME.bgDark;
+            const ratio = r.count / selectedNumbers.size;
+            const countColor = r.isFull ? THEME.highlight : ratio >= .6 ? THEME.success : ratio >= .3 ? THEME.warning : THEME.info;
+            const numsHtml = r.matched.map(n => `<span style="background:${THEME.bgDarker};color:${THEME.primary};border:1px solid ${THEME.border};padding:1px 5px;border-radius:5px;margin:1px;display:inline-block;font-size:11px;font-weight:700">${n}</span>`).join('');
+            const tr = document.createElement('tr'); tr.className = 'slt-row';
+            tr.style.cssText = `background:${baseBg};${i===0?`border-left:3px solid ${THEME.highlight}`:''}`;
+            tr.innerHTML = `<td style="padding:7px 6px 7px 10px;color:${THEME.textMuted};font-size:11px">${i+1}</td><td style="padding:7px 6px"><span style="font-weight:700;font-size:12px;color:${r.isFull?THEME.highlight:THEME.text}">${r.ticketId}</span>${r.isFull?`<span style="margin-left:5px;font-size:9px;font-weight:700;background:${THEME.highlight};color:${THEME.bgDark};padding:1px 5px;border-radius:4px">★ ПОЛНОЕ</span>`:''}${i===0?`<span style="margin-left:5px;font-size:9px;font-weight:700;background:${THEME.primary};color:${THEME.bgDark};padding:1px 5px;border-radius:4px">👑 ТОП</span>`:''}</td><td style="padding:7px 6px;text-align:center"><span style="background:${THEME.bgDarker};color:${countColor};border:1px solid ${countColor}66;padding:2px 10px;border-radius:10px;font-weight:700;font-size:12px">${r.count}/${selectedNumbers.size}</span></td><td style="padding:7px 10px 7px 6px;line-height:2">${numsHtml}</td>`;
+            tr.onclick = () => selectTicketRow(r, tr, results); tbody.appendChild(tr);
         });
     }
 
     /* ═══════════════════════════════════════════════════
-       ВЫДЕЛЕНИЕ БИЛЕТА ПО КЛИКУ
+       ВСПОМОГАТЕЛЬНЫЕ
     ═══════════════════════════════════════════════════ */
     function selectTicketRow(r, tr, results) {
-        document.querySelectorAll('.slt-row.slt-row-active').forEach(el =>
-            el.classList.remove('slt-row-active')
-        );
+        document.querySelectorAll('.slt-row.slt-row-active').forEach(el => el.classList.remove('slt-row-active'));
         tr.classList.add('slt-row-active');
-
-        document.querySelectorAll('.slt-ticket-best, .slt-ticket-selected').forEach(el =>
-            el.classList.remove('slt-ticket-best', 'slt-ticket-selected')
-        );
-
+        document.querySelectorAll('.slt-ticket-best, .slt-ticket-selected').forEach(el => el.classList.remove('slt-ticket-best', 'slt-ticket-selected'));
         if (results.length) results[0].ticket.classList.add('slt-ticket-best');
-
         r.ticket.classList.add(r === results[0] ? 'slt-ticket-best' : 'slt-ticket-selected');
-        r.ticket.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        activeTicket = r.ticket;
+        r.ticket.scrollIntoView({ behavior: 'smooth', block: 'center' }); activeTicket = r.ticket;
     }
-
-    /* ═══════════════════════════════════════════════════
-       ПЕРЕКЛЮЧЕНИЕ ЧИСЛА
-    ═══════════════════════════════════════════════════ */
     function toggleNumber(n, btn) {
-        if (selectedNumbers.has(n)) {
-            selectedNumbers.delete(n);
-            btn.classList.remove('active');
-        } else {
-            selectedNumbers.add(n);
-            btn.classList.add('active');
-        }
-        const el = document.getElementById('slt-sel-count');
-        if (el) el.textContent = `${selectedNumbers.size} выбрано`;
-        triggerAutoScan();
+        selectedNumbers.has(n) ? (selectedNumbers.delete(n), btn.classList.remove('active')) : (selectedNumbers.add(n), btn.classList.add('active'));
+        const el = document.getElementById('slt-sel-count'); if (el) el.textContent = `${selectedNumbers.size} выбрано`; triggerAutoScan();
     }
-
     function refreshNumBtns() {
-        document.querySelectorAll('.slt-num-btn').forEach(btn => {
-            const n = parseInt(btn.dataset.num, 10);
-            btn.classList.toggle('active', selectedNumbers.has(n));
-        });
-        const el = document.getElementById('slt-sel-count');
-        if (el) el.textContent = `${selectedNumbers.size} выбрано`;
+        document.querySelectorAll('.slt-num-btn').forEach(btn => { const n = parseInt(btn.dataset.num, 10); btn.classList.toggle('active', selectedNumbers.has(n)); });
+        const el = document.getElementById('slt-sel-count'); if (el) el.textContent = `${selectedNumbers.size} выбрано`;
     }
-
-    /* ═══════════════════════════════════════════════════
-       АВТО-СКАН
-    ═══════════════════════════════════════════════════ */
-    let autoScanDebounce = null;
-    function triggerAutoScan() {
-        const panel = document.getElementById(PANEL_ID);
-        if (!panel || panel.dataset.autoscan !== '1') return;
-        clearTimeout(autoScanDebounce);
-        autoScanDebounce = setTimeout(() => {
-            const res  = scan();
-            const body = document.getElementById('slt-results-body');
-            if (body) renderResults(body, res);
-        }, 400);
-    }
-
-    /* ═══════════════════════════════════════════════════
-       ОЧИСТКА ПОДСВЕТКИ
-    ═══════════════════════════════════════════════════ */
     function cleanupHighlights() {
-        document.querySelectorAll('[data-test-id="number"][data-slt-hit]').forEach(s => {
-            s.removeAttribute('data-slt-hit');
-            s.style.cssText = '';
-        });
-        document.querySelectorAll('.slt-ticket-best, .slt-ticket-selected').forEach(el =>
-            el.classList.remove('slt-ticket-best', 'slt-ticket-selected')
-        );
+        document.querySelectorAll(`${SEL.NUMBER}[data-slt-hit]`).forEach(s => { s.removeAttribute('data-slt-hit'); s.classList.remove('slt-num-hit', 'full', 'partial'); });
+        document.querySelectorAll('.slt-ticket-best, .slt-ticket-selected').forEach(el => el.classList.remove('slt-ticket-best', 'slt-ticket-selected'));
+    }
+    let autoScanTimer = null;
+    function triggerAutoScan() {
+        const panel = document.getElementById(PANEL_ID); if (!panel || panel.dataset.autoscan !== '1') return;
+        clearTimeout(autoScanTimer); autoScanTimer = setTimeout(() => {
+            const { results } = scan(); const body = document.getElementById('slt-results-body');
+            if (body) 'requestIdleCallback' in window ? requestIdleCallback(() => renderResults(body, results), { timeout: 500 }) : renderResults(body, results);
+        }, 300);
     }
 
     /* ═══════════════════════════════════════════════════
-       ПОСТРОЕНИЕ ПАНЕЛИ
+       ПАНЕЛЬ
     ═══════════════════════════════════════════════════ */
     function buildPanel() {
         const existing = document.getElementById(PANEL_ID);
         let savedLeft = null, savedTop = null;
-        if (existing) {
-            savedLeft = existing.style.left;
-            savedTop  = existing.style.top;
-            existing.remove();
-        }
+        if (existing) { savedLeft = existing.style.left; savedTop = existing.style.top; existing.remove(); }
 
-        const panel = document.createElement('div');
-        panel.id = PANEL_ID;
-        panel.dataset.autoscan = '1'; /* авто-скан включён по умолчанию */
-        panel.style.cssText = `
-            position: fixed;
-            top: ${savedTop  || '16px'};
-            ${savedLeft ? `left: ${savedLeft}` : 'right: 16px'};
-            width: 600px;
-            height: 70vh;
-            min-height: 360px;
-            background: ${D.bg};
-            color: ${D.fg};
-            border-radius: 14px;
-            border: 1px solid ${D.borderDim};
-            box-shadow: 0 16px 48px #00000099, 0 0 0 1px ${D.comment}22;
-            z-index: 2147483647;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        `;
+        const panel = document.createElement('div'); panel.id = PANEL_ID; panel.dataset.autoscan = '1';
+        panel.style.cssText = `position:fixed;top:${savedTop||'16px'};${savedLeft?`left:${savedLeft}`:'right:16px'};width:600px;height:70vh;min-height:360px;background:${THEME.bg};color:${THEME.text};border-radius:14px;border:1px solid ${THEME.border};box-shadow:0 16px 48px #00000099,0 0 0 1px ${THEME.hover}22;z-index:2147483647;overflow:hidden;display:flex;flex-direction:column`;
 
-        /* ╔══════════════════════════════╗
-           ║           ШАПКА             ║
-           ╚══════════════════════════════╝ */
-        const head = document.createElement('div');
-        head.style.cssText = `
-            background: ${D.bgDark};
-            border-bottom: 1px solid ${D.borderDim};
-            padding: 10px 14px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            cursor: grab;
-            user-select: none;
-            flex-shrink: 0;
-        `;
-        head.innerHTML = `
-            <div style="display:flex; align-items:center; gap:10px;">
-                <span style="font-size:14px; font-weight:700; color:${D.purple};">
-                    🎯 Сканер
-                </span>
-            </div>
-            <div style="display:flex; gap:8px; align-items:center;">
+        const head = document.createElement('div'); head.style.cssText = `background:${THEME.bgDark};border-bottom:1px solid ${THEME.border};padding:10px 14px;display:flex;align-items:center;justify-content:space-between;cursor:grab;user-select:none;flex-shrink:0`;
+        head.innerHTML = `<div style="display:flex;align-items:center;gap:10px"><span style="font-size:14px;font-weight:700;color:${THEME.primary}">🎯 Сканер</span></div><div style="display:flex;gap:8px;align-items:center"><label class="slt-control"><input type="checkbox" id="slt-autoscan" checked><span>Авто</span></label><label class="slt-control"><input type="checkbox" id="slt-autoload" checked><span>Автозагрузка</span></label><label class="slt-control" title="Считать совпадения в каждой строке отдельно"><input type="checkbox" id="slt-single-row"><span>По строкам</span></label><button id="slt-scan-btn" class="slt-hbtn slt-hbtn--primary">▶ Скан</button><button id="slt-close" class="slt-hbtn slt-hbtn--danger" style="width:30px;height:30px;padding:0;display:flex;align-items:center;justify-content:center;font-size:16px">✕</button></div>`;
 
-                <!-- Чекбокс авто-скан -->
-                <label style="
-                    display:flex; align-items:center; gap:6px;
-                    cursor:pointer; font-size:12px; color:${D.fgMuted};
-                    background:${D.curLine}; padding:4px 10px;
-                    border-radius:7px; border:1px solid ${D.borderDim};
-                    user-select:none;
-                ">
-                    <input type="checkbox" id="slt-autoscan" checked
-                        style="
-                            accent-color:${D.purple};
-                            width:13px; height:13px;
-                            cursor:pointer; margin:0;
-                        ">
-                    <span>Авто</span>
-                </label>
+        const numsSection = document.createElement('div'); numsSection.style.cssText = `background:${THEME.bgDark};border-bottom:1px solid ${THEME.border};padding:8px 14px;flex-shrink:0`;
+        numsSection.innerHTML = `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px"><span style="font-size:11px;font-weight:700;color:${THEME.info};letter-spacing:.5px">ЧИСЛА <span id="slt-sel-count" style="background:${THEME.panel};color:${THEME.primary};padding:1px 8px;border-radius:8px;font-size:10px;margin-left:5px">${selectedNumbers.size} выбрано</span></span><div style="display:flex;gap:6px;align-items:center"><div style="display:flex;align-items:center;gap:4px;font-size:11px;color:${THEME.info}"><span>Порог:</span><input type="number" id="slt-threshold" class="slt-input" min="1" max="90" value="${stopThreshold}"></div><button id="slt-nums-default" class="slt-hbtn slt-hbtn--success" style="font-size:11px;padding:3px 9px">↺</button><button id="slt-nums-clear" class="slt-hbtn slt-hbtn--danger" style="font-size:11px;padding:3px 9px">✕</button><button id="slt-nums-all" class="slt-hbtn slt-hbtn--warning" style="font-size:11px;padding:3px 9px">✦</button></div></div><div id="slt-nums-grid" style="display:grid;grid-template-columns:repeat(15,1fr);gap:3px"></div>`;
 
-                <!-- Чекбокс автозагрузки -->
-                <label style="
-                    display:flex; align-items:center; gap:6px;
-                    cursor:pointer; font-size:12px; color:${D.fgMuted};
-                    background:${D.curLine}; padding:4px 10px;
-                    border-radius:7px; border:1px solid ${D.borderDim};
-                    user-select:none;
-                ">
-                    <input type="checkbox" id="slt-autoload" checked
-                        style="
-                            accent-color:${D.purple};
-                            width:13px; height:13px;
-                            cursor:pointer; margin:0;
-                        ">
-                    <span>Автозагрузка</span>
-                </label>
+        const grid = numsSection.querySelector('#slt-nums-grid');
+        for (let n = 1; n <= 90; n++) { const btn = document.createElement('button'); btn.className = 'slt-num-btn' + (selectedNumbers.has(n) ? ' active' : ''); btn.textContent = n; btn.dataset.num = n; btn.onclick = () => toggleNumber(n, btn); grid.appendChild(btn); }
 
-                <!-- Чекбокс поиска в одной строке -->
-                <label style="
-                    display:flex; align-items:center; gap:6px;
-                    cursor:pointer; font-size:12px; color:${D.fgMuted};
-                    background:${D.curLine}; padding:4px 10px;
-                    border-radius:7px; border:1px solid ${D.borderDim};
-                    user-select:none;
-                ">
-                    <input type="checkbox" id="slt-single-row"
-                        style="
-                            accent-color:${D.purple};
-                            width:13px; height:13px;
-                            cursor:pointer; margin:0;
-                        ">
-                    <span>В строке</span>
-                </label>
+        const body = document.createElement('div'); body.id = 'slt-results-body'; body.style.cssText = 'overflow-y:auto;padding:10px 12px;flex:1;min-height:0';
+        panel.append(head, numsSection, body); document.body.appendChild(panel);
 
-                <!-- Кнопка Скан -->
-                <button id="slt-scan-btn" class="slt-hbtn" style="
-                    background:${D.purple}; color:${D.bgDark};
-                    border:1px solid ${D.purple};">
-                    ▶ Скан
-                </button>
-
-                <!-- Закрыть -->
-                <button id="slt-close" class="slt-hbtn" style="
-                    background:${D.curLine}; color:${D.red};
-                    border:1px solid ${D.borderDim};
-                    width:30px; height:30px; padding:0;
-                    display:flex; align-items:center; justify-content:center;
-                    font-size:16px;">
-                    ✕
-                </button>
-            </div>
-        `;
-
-        /* ╔══════════════════════════════╗
-           ║        СЕТКА ЧИСЕЛ          ║
-           ╚══════════════════════════════╝ */
-        const numsSection = document.createElement('div');
-        numsSection.style.cssText = `
-            background: ${D.bgDark};
-            border-bottom: 1px solid ${D.borderDim};
-            padding: 8px 14px;
-            flex-shrink: 0;
-        `;
-
-        /* Заголовок секции */
-        const numsHeader = document.createElement('div');
-        numsHeader.style.cssText = `
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 7px;
-        `;
-        numsHeader.innerHTML = `
-            <span style="font-size:11px; font-weight:700; color:${D.cyan}; letter-spacing:.5px;">
-                ЧИСЛА
-                <span id="slt-sel-count" style="
-                    background:${D.curLine}; color:${D.purple};
-                    padding:1px 8px; border-radius:8px;
-                    font-size:10px; margin-left:5px;">
-                    ${selectedNumbers.size} выбрано
-                </span>
-            </span>
-            <div style="display:flex; gap:6px; align-items:center;">
-                <div style="display:flex; align-items:center; gap:4px; font-size:11px; color:${D.cyan};">
-                    <span>Порог:</span>
-                    <input type="number" id="slt-threshold" min="1" max="90" value="${stopThreshold}"
-                        style="
-                            width: 40px;
-                            background: ${D.curLine};
-                            border: 1px solid ${D.borderDim};
-                            color: ${D.fg};
-                            font-size: 11px;
-                            padding: 2px 4px;
-                            border-radius: 4px;
-                            text-align: center;
-                        ">
-                </div>
-                <button id="slt-nums-default" class="slt-hbtn" style="
-                    background:${D.curLine}; color:${D.green};
-                    border:1px solid ${D.borderDim}; font-size:11px; padding:3px 9px;">
-                    ↺ По умолч.
-                </button>
-                <button id="slt-nums-clear" class="slt-hbtn" style="
-                    background:${D.curLine}; color:${D.red};
-                    border:1px solid ${D.borderDim}; font-size:11px; padding:3px 9px;">
-                    ✕ Сброс
-                </button>
-                <button id="slt-nums-all" class="slt-hbtn" style="
-                    background:${D.curLine}; color:${D.orange};
-                    border:1px solid ${D.borderDim}; font-size:11px; padding:3px 9px;">
-                    ✦ Все
-                </button>
-            </div>
-        `;
-
-        /* Сетка 1–90 (15 колонок × 6 рядов) */
-        const numsGrid = document.createElement('div');
-        numsGrid.id = 'slt-nums-grid';
-        numsGrid.style.cssText = `
-            display: grid;
-            grid-template-columns: repeat(15, 1fr);
-            gap: 3px;
-        `;
-
-        for (let n = 1; n <= 90; n++) {
-            const btn = document.createElement('button');
-            btn.className   = 'slt-num-btn' + (selectedNumbers.has(n) ? ' active' : '');
-            btn.textContent = n;
-            btn.dataset.num = n;
-            btn.title       = `Число ${n}`;
-            btn.onclick     = () => toggleNumber(n, btn);
-            numsGrid.appendChild(btn);
-        }
-
-        numsSection.appendChild(numsHeader);
-        numsSection.appendChild(numsGrid);
-
-        /* ╔══════════════════════════════╗
-           ║         РЕЗУЛЬТАТЫ          ║
-           ╚══════════════════════════════╝ */
-        const body = document.createElement('div');
-        body.id = 'slt-results-body';
-        body.style.cssText = `
-            overflow-y: auto;
-            padding: 10px 12px;
-            flex: 1;
-            min-height: 0;
-        `;
-
-        /* Сборка */
-        panel.append(head, numsSection, body);
-        document.body.appendChild(panel);
-
-        /* ── СОБЫТИЯ ── */
-        panel.querySelector('#slt-close').onclick = () => {
-            cleanupHighlights();
-            panel.remove();
-        };
-
-        panel.querySelector('#slt-scan-btn').onclick = () => {
-            const res  = scan();
-            const bodyEl = document.getElementById('slt-results-body');
-            if (bodyEl) renderResults(bodyEl, res);
-        };
-
-        panel.querySelector('#slt-autoscan').addEventListener('change', function () {
-            panel.dataset.autoscan = this.checked ? '1' : '0';
-        });
-
-        panel.querySelector('#slt-autoload').addEventListener('change', function () {
-            autoLoadEnabled = this.checked;
-        });
-
-        panel.querySelector('#slt-single-row').addEventListener('change', function () {
-            checkSingleRow = this.checked;
-            console.log(`Поиск в одной строке: ${checkSingleRow ? 'включен' : 'выключен'}`);
-        });
-
-        panel.querySelector('#slt-threshold').addEventListener('change', function () {
-            const val = parseInt(this.value, 10);
-            if (!isNaN(val) && val >= 1 && val <= 90) {
-                stopThreshold = val;
-                console.log(`Порог остановки изменён на ${stopThreshold}`);
-            } else {
-                this.value = stopThreshold;
-            }
-        });
-
-        panel.querySelector('#slt-nums-default').onclick = () => {
-            selectedNumbers = new Set(DEFAULT_NUMBERS);
-            refreshNumBtns();
-            triggerAutoScan();
-        };
-
-        panel.querySelector('#slt-nums-clear').onclick = () => {
-            selectedNumbers.clear();
-            refreshNumBtns();
-            cleanupHighlights();
-            lastResults = [];
-            renderResults(document.getElementById('slt-results-body'), []);
-        };
-
-        panel.querySelector('#slt-nums-all').onclick = () => {
-            for (let n = 1; n <= 90; n++) selectedNumbers.add(n);
-            refreshNumBtns();
-            triggerAutoScan();
-        };
-
+        panel.querySelector('#slt-close').onclick = () => { cleanupHighlights(); panel.remove(); };
+        panel.querySelector('#slt-scan-btn').onclick = () => { const { results } = scan(); const el = document.getElementById('slt-results-body'); if (el) renderResults(el, results); };
+        panel.querySelector('#slt-autoscan').onchange = function () { panel.dataset.autoscan = this.checked ? '1' : '0'; };
+        panel.querySelector('#slt-autoload').onchange = function () { autoLoadEnabled = this.checked; };
+        panel.querySelector('#slt-single-row').onchange = function () { checkSingleRow = this.checked; };
+        panel.querySelector('#slt-threshold').onchange = function () { const v = parseInt(this.value, 10); if (!isNaN(v) && v >= 1 && v <= 90) stopThreshold = v; else this.value = stopThreshold; };
+        panel.querySelector('#slt-nums-default').onclick = () => { selectedNumbers = new Set(DEFAULT_NUMBERS); refreshNumBtns(); triggerAutoScan(); };
+        panel.querySelector('#slt-nums-clear').onclick = () => { selectedNumbers.clear(); refreshNumBtns(); cleanupHighlights(); lastResults = []; renderResults(document.getElementById('slt-results-body'), []); };
+        panel.querySelector('#slt-nums-all').onclick = () => { for (let n = 1; n <= 90; n++) selectedNumbers.add(n); refreshNumBtns(); triggerAutoScan(); };
         enableDrag(panel, head);
-
-        /* Начальный рендер результатов */
-        renderResults(body, lastResults);
+        renderResults(body, lastResults?.results || lastResults);
     }
 
     /* ═══════════════════════════════════════════════════
        DRAG & DROP
     ═══════════════════════════════════════════════════ */
     function enableDrag(el, handle) {
-        let ox, oy, sl, st;
+        let ox, oy, sl, st, wasRight;
         handle.addEventListener('mousedown', e => {
-            if (e.target.closest('button, input, label')) return;
-            e.preventDefault();
-            const r = el.getBoundingClientRect();
-            ox = e.clientX; oy = e.clientY;
-            sl = r.left;    st = r.top;
-            el.style.right = 'auto';
-            handle.style.cursor = 'grabbing';
-
-            const onMove = e => {
-                el.style.left = `${sl + e.clientX - ox}px`;
-                el.style.top  = `${st + e.clientY - oy}px`;
-            };
-            const onUp = () => {
-                handle.style.cursor = 'grab';
-                window.removeEventListener('mousemove', onMove);
-                window.removeEventListener('mouseup',   onUp);
-            };
-            window.addEventListener('mousemove', onMove);
-            window.addEventListener('mouseup',   onUp);
+            if (e.target.closest('button,input,label')) return; e.preventDefault();
+            const r = el.getBoundingClientRect(); ox = e.clientX; oy = e.clientY; sl = r.left; st = r.top; wasRight = el.style.right; el.style.right = 'auto'; handle.style.cursor = 'grabbing';
+            const onMove = e => { el.style.left = `${sl + e.clientX - ox}px`; el.style.top = `${st + e.clientY - oy}px`; };
+            const onUp = () => { handle.style.cursor = 'grab'; if (wasRight) el.style.right = wasRight; window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp); };
+            window.addEventListener('mousemove', onMove); window.addEventListener('mouseup', onUp);
         });
     }
 
     /* ═══════════════════════════════════════════════════
-       MutationObserver — авто-скан при подгрузке билетов
+       ГЛОБАЛЬНЫЙ OBSERVER
     ═══════════════════════════════════════════════════ */
-    let mutDebounce = null;
-    const observer = new MutationObserver(mutations => {
-        /* Реагируем только если добавились новые билеты */
-        const hasNewTickets = mutations.some(m =>
-            [...m.addedNodes].some(n =>
-                n.nodeType === 1 && (
-                    n.matches?.('[data-test-id="ticket"]') ||
-                    n.querySelector?.('[data-test-id="ticket"]')
-                )
-            )
-        );
-        if (!hasNewTickets) return;
-
-        clearTimeout(mutDebounce);
-        mutDebounce = setTimeout(() => {
+    let mutTimer = null;
+    const globalObserver = new MutationObserver(mutations => {
+        const hasNew = mutations.some(m => [...m.addedNodes].some(n => n.nodeType === 1 && (n.matches?.(SEL.TICKET) || n.querySelector?.(SEL.TICKET))));
+        if (!hasNew) return; clearTimeout(mutTimer);
+        mutTimer = setTimeout(() => {
             const panel = document.getElementById(PANEL_ID);
-            if (!panel || panel.dataset.autoscan !== '1') return;
-            const res  = scan();
-            const body = document.getElementById('slt-results-body');
-            if (body) renderResults(body, res);
-        }, 700);
+            if (!panel || panel.dataset.autoscan !== '1' || isWaitingForLoad) return;
+            const { results } = scan(); const body = document.getElementById('slt-results-body');
+            if (body) renderResults(body, results);
+        }, 500);
     });
 
     /* ═══════════════════════════════════════════════════
-       КНОПКА-ТРИГГЕР (свернуть / развернуть)
+       ТРИГГЕР
     ═══════════════════════════════════════════════════ */
     function addTriggerBtn() {
         if (document.getElementById(BTN_ID)) return;
-        const btn = document.createElement('button');
-        btn.id    = BTN_ID;
-        btn.title = 'Открыть / закрыть сканер';
-        btn.innerHTML = '🎯';
-        btn.style.cssText = `
-            position: fixed;
-            bottom: 24px; right: 24px;
-            z-index: 2147483646;
-            width: 50px; height: 50px;
-            border: 2px solid ${D.purple};
-            background: ${D.bg};
-            font-size: 22px;
-            cursor: pointer;
-            transition: transform .2s, box-shadow .2s;
-            display: flex; align-items: center; justify-content: center;
-        `;
-        btn.onmouseenter = () => {
-            btn.style.transform = 'scale(1.12)';
-            btn.style.boxShadow = `0 6px 26px #00000099, 0 0 20px ${D.purple}88`;
-        };
-        btn.onmouseleave = () => {
-            btn.style.transform = 'scale(1)';
-            btn.style.boxShadow = `0 4px 20px #00000077, 0 0 14px ${D.purple}44`;
-        };
-        btn.onclick = () => {
-            if (document.getElementById(PANEL_ID)) {
-                cleanupHighlights();
-                document.getElementById(PANEL_ID).remove();
-            } else {
-                buildPanel();
-            }
-        };
+        const btn = document.createElement('button'); btn.id = BTN_ID; btn.title = 'Открыть / закрыть сканер'; btn.innerHTML = '🎯';
+        btn.style.cssText = `position:fixed;bottom:24px;right:24px;z-index:2147483646;width:50px;height:50px;border:2px solid ${THEME.primary};background:${THEME.bg};font-size:22px;cursor:pointer;transition:transform .2s,box-shadow .2s;display:flex;align-items:center;justify-content:center`;
+        btn.onmouseenter = () => { btn.style.transform = 'scale(1.12)'; btn.style.boxShadow = `0 6px 26px #00000099, 0 0 20px ${THEME.primary}88`; };
+        btn.onmouseleave = () => { btn.style.transform = 'scale(1)'; btn.style.boxShadow = `0 4px 20px #00000077, 0 0 14px ${THEME.primary}44`; };
+        btn.onclick = () => { if (document.getElementById(PANEL_ID)) { cleanupHighlights(); document.getElementById(PANEL_ID).remove(); } else buildPanel(); };
         document.body.appendChild(btn);
     }
 
@@ -934,20 +364,10 @@
        ИНИЦИАЛИЗАЦИЯ
     ═══════════════════════════════════════════════════ */
     function init() {
-        addTriggerBtn();
-        observer.observe(document.body, { childList: true, subtree: true });
-
-        /* Панель открыта по умолчанию + сразу сканируем */
+        addTriggerBtn(); globalObserver.observe(document.body, { childList: true, subtree: true });
         buildPanel();
-        setTimeout(() => {
-            const res  = scan();
-            const body = document.getElementById('slt-results-body');
-            if (body) renderResults(body, res);
-        }, 1200); /* небольшая задержка — даём странице отрисовать билеты */
+        setTimeout(() => { const { results } = scan(); const body = document.getElementById('slt-results-body'); if (body) renderResults(body, results); }, 800);
     }
 
-    document.readyState === 'loading'
-        ? document.addEventListener('DOMContentLoaded', init)
-        : init();
-
+    document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', init) : init();
 })();
