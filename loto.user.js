@@ -1,11 +1,11 @@
 // ==UserScript==
-// @name         🎯 Stoloto 7.1 (Tours + Profiles)
+// @name         🎯 Stoloto 7.2 (Tours + Profiles)
 // @namespace    https://stoloto.ru/
-// @version      7.1
-// @description  Сканер ГЖЛТ: 3 тура, профили чисел, гибкие пороги. Стоп при первом результате.
+// @version      7.2
+// @description  Сканер (Исправлен стоп по порогу)
 // @author       Expert JS Team
-// @match        https://www.stoloto.ru/gzhl/game*
-// @match        https://stoloto.ru/gzhl/game*
+// @match        https://www.stoloto.ru/*
+// @match        https://stoloto.ru/*
 // @grant        GM_addStyle
 // @run-at       document-idle
 // ==/UserScript==
@@ -51,7 +51,7 @@ const TOURS = {
 let currentTour = 1;
 let thresholds = { 1: 5, 2: 15, 3: 30 };
 
-const STORAGE_KEY = 'stoloto_scanner_v7_1';
+const STORAGE_KEY = 'stoloto_scanner_v7_2';
 const SETS_KEY = STORAGE_KEY + '_sets';
 const SAVED_RESULTS_KEY = STORAGE_KEY + '_savedResults';
 let currentSetName = 'Базовый';
@@ -62,7 +62,7 @@ let currentSetName = 'Базовый';
 const Storage = {
 save() {
 const state = {
-version: 7.1, currentSetName, currentTour, thresholds,
+version: 7.2, currentSetName, currentTour, thresholds,
 selectedNumbers: [...selectedNumbers],
 settings: { autoLoadEnabled, theme: 'nord' }
 };
@@ -73,7 +73,7 @@ try {
 const raw = localStorage.getItem(STORAGE_KEY);
 if (!raw) return this.migrateOld();
 const state = JSON.parse(raw);
-if (state.version < 7.1) return this.migrateOld();
+if (state.version < 7.2) return this.migrateOld();
 if (Array.isArray(state.selectedNumbers)) selectedNumbers = new Set(state.selectedNumbers);
 if (state.currentSetName) currentSetName = state.currentSetName;
 if (state.currentTour && TOURS[state.currentTour]) currentTour = state.currentTour;
@@ -474,7 +474,11 @@ if (isWaitingForLoad) return;
 const payload = scan();
 const body = document.getElementById('slt-results-body');
 if (body) renderResults(body, payload.results);
-if (payload.results.length > 0) {
+
+// 🛑 ИСПРАВЛЕНИЕ: Останавливаем сканирование ТОЛЬКО если достигнут порог (stopReason)
+// Раньше здесь стояло `if (payload.results.length > 0)`, из-за чего скрипт прерывался
+// на любом "промежуточном" билете (например, с 15 совпадениями), не дойдя до 30.
+if (payload.stopReason) {
 isScanning = false;
 if (scanInterval) { clearInterval(scanInterval); scanInterval = null; }
 updateScanUI();
