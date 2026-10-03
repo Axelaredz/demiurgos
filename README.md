@@ -24,14 +24,15 @@
 ```
 PROTOS 1.2.1  (корень, мета-генератор ролей, для агентов с инструментами)
 ├── DEMIURGOS 1.0.0  (компактный PROTOS для обычных веб-чатов без инструментов)
-├── MEFISTOFEL 7.0.0 (листовой: тексты для VK)
+├── MEFISTOFEL 8.0.0 (листовой: тексты для VK)
 ├── WANGOG 4.0.0     (листовой: промпты для генерации изображений и постеры)
-└── AMADEUS 1.0.0    (листовой: песни и workflow для ComfyUI YuE2)
+├── AMADEUS 1.0.0    (листовой: песни и workflow для ComfyUI YuE2)
+└── DAEDALUS 1.0.0   (листовой: multiview-3D и workflow для ComfyUI-3D-Pack)
 ```
 
 * Генераторы (`PROTOS`, `DEMIURGOS`) умеют создавать новые роли.
-* Листовые роли (`MEFISTOFEL`, `WANGOG`, `AMADEUS`) новых ролей не создают — только артефакты своего домена.
-* У каждой роли свой неймспейс ID (`C*/G*/P*/R*` у PROTOS, `DP*/DC*/DG*/DR*` у DEMIURGOS, `MC*/MG*/MD*` у MEFISTOFEL, `WC*/WG*/WD*` у WANGOG, `AMC*/AMG*/AMD*` у AMADEUS), чтобы аудит между ролями не путался.
+* Листовые роли (`MEFISTOFEL`, `WANGOG`, `AMADEUS`, `DAEDALUS`) новых ролей не создают — только артефакты своего домена.
+* У каждой роли свой неймспейс ID (`C*/G*/P*/R*` у PROTOS, `DP*/DC*/DG*/DR*` у DEMIURGOS, `MC*/MG*/MD*` у MEFISTOFEL, `WC*/WG*/WD*` у WANGOG, `AMC*/AMG*/AMD*` у AMADEUS, `DAC*/DAG*/DAD*` у DAEDALUS), чтобы аудит между ролями не путался.
 
 ### Роли детально
 
@@ -66,22 +67,23 @@ PROTOS 1.2.1  (корень, мета-генератор ролей, для аг
 
 **Отличия от PROTOS (DELTA):** новый неймспейс `DP*/DC*/DG*/DR*/DA1`; упрощённая валидация DR6 (без требования пересчёта токенов именованным токенизатором); явный `web_assumption`; целевая экономия ≤2500 токенов на дочерние артефакты.
 
-#### 3. MEFISTOFEL `MEFISTOFEL.xml` — v7.0.0, ~5660 токенов
+#### 3. MEFISTOFEL `MEFISTOFEL.xml` — v8.0.0, ~9280 токенов
 
-**Кто:** VK Post and Article Writer-Editor. Копирайтер под алгоритмы VK.
+**Кто:** VK Content Editor — evidence-aware Russian social content. Редактор VK-контента с явной эпистемической моделью.
 
 **Что делает:**
-- Пишет и правит посты на стену и статьи: плотность вместо воды, хук в первые строки, мнение отдельно от факта, тон уверенный, слегка провокационный, без агрессии.
-- Знает домен: сигналы умной ленты VK (сохранения, шеры, дискуссии важнее лайков), гигиена ссылок (внешняя ссылка в теле убивает охват — только первым комментарием), хэштеги ≤3–5, анти-AI-паттерны, требование «ё».
+- Пишет и правит посты на стену и статьи под конкретную задачу публикации (inform / explain / compare / teach / opinion / case / announce / discuss / convert): плотность вместо воды, хук с substantive-ценностью, мнение отдельно от факта, тон expert-практика без агрессии и без artificial controversy.
+- Вместо «reach-фольклора» — эпистемическая модель MD1: `FACT` / `USER_CLAIM` / `HYPOTHESIS` / `OPINION` / `UNKNOWN`. Уверенный текст не превращает USER_CLAIM и HYPOTHESIS в FACT (MC7); метки внутренние по умолчанию и выходят наружу, когда неопределённость существенна или пользователь просит факт-чек.
+- Знает домен: сигналы умной ленты VK как категории (спец-уровень — только то, что VK реально раскрывает), гигиена ссылок и хэштегов — по целям публикации, а не по «правилам», анти-AI-паттерны, нормативное «ё».
 - Выдаёт только черновик-текст (пост + опционально первый комментарий), никогда не публикует сам.
 
-**Когда использовать:** нужен пост/статья ВКонтакте с максимальным органическим охватом.
+**Когда использовать:** нужен пост/статья ВКонтакте под конкретную цель, без выдуманной статистики и без bait-механик.
 
-**Команды:** `/post`, `/article`, `/review`, `/fix`, `/mode`, `/debug`. Форматы SHORT / MEDIUM / LONG с лимитами длины.
+**Команды:** `/post`, `/edit`, `/review`, `/audit` (факт-чек с явными метками), `/mode`, `/debug`. Форматы SHORT / MEDIUM / LONG / ARTICLE как редакторские ориентиры, не требования платформы.
 
-**Честность:** точные веса ранжирования VK не раскрыты — роль оперирует качественной эвристикой сигналов, а прогнозы охвата всегда маркирует `NOT_VERIFIED`. Источники указаны явно: `vk.com/legal/recommendations`, `ads.vk.com/insights/...`, разбор ppc.world от 08.07.2026. Числовые мультипликаторы типа «×4» из старой v6.0 удалены как непроверенные.
+**Честность и раз demotions:** VK не публикует веса ранжирования, поэтому «ссылки только в первом комментарии», «≤5 хэштегов», «3 строки на экран», «87% трафика с мобилы», «×2–3 показа» и «120 часов разлогина» из v7 понижены до рекомендаций с явной пометкой, а не выданы за механики платформы (MC8). Остались спец-уровнем источники `vk.com/legal/recommendations` и `vk.company/ru/press/releases/12216/`, практики — атрибутированы авторам (ppc.world 08.07.2026).
 
-**Безопасность:** MG7 — запрет на нелегальный/враждебный/обманный контент; факты без источника маркируются, а не выдаются за проверенные.
+**Безопасность:** MG7 (из v7, сохранён) — запрет агрессии/нависти/провокации/шока и запрещённых тем (алкоголь, табак); реальный живой частный человек в рискованной рамке — обобщать, не идентифицировать; сексуализация несовершеннолетних — краткий отказ; чужие персонажи/логотипы — только обобщённые черты.
 
 #### 4. WANGOG `WANGOG.xml` — v4.0.0, ~5900 токенов
 
@@ -112,6 +114,22 @@ PROTOS 1.2.1  (корень, мета-генератор ролей, для аг
 
 **Гейты:** AMC7 — только заявленные чекпоинты, никаких выдуманных имён файлов/хешей; AMC8 — только документированные параметры; AMC9 — лицензия (персональное/авторское с монетизацией — бесплатно, академическое — некоммерческое, коммерческое использование весов компанией — нужна коммерческая лицензия); AMG7 — музыкальная безопасность (никакого нелегального/ненавистнического контента, каверы — только personal/learning без прав на релиз, чужой вокал не выдавать за свой).
 
+#### 6. DAEDALUS `DAEDALUS.xml` — v1.0.0, ~6630 токенов
+
+**Кто:** ComfyUI Multiview-3D Modelwright and Pipeline Operator. Оператор multiview-пайплайна ComfyUI-3D-Pack.
+
+**Что делает:**
+- Строит multiview-сет из одного фото или текста: Zero123++ (1→6 видов, 320 — дешёвый бейзлайн), Era3D (1→6 видов + нормали, 512, надо ≥16 GB VRAM), Wonder3D, Unique3D (4 стадии: 256 MV → апскейл 512 → SR 2048 → нормали → меш), MV-Adapter IG2MV (картинка+меш→виды) / TG2MV (текст+меш→виды).
+- Выбирает маршрут реконструкции (DAD3 одной строкой — почему): MV-first — InstantMesh (разреженные виды на белом фоне → текстурированный меш, пара к Zero123++), CRM (6 видов + CCM → меш, 3 стадии делятся при слабой VRAM), FlexiCubes (depth+mask+нормали → меш); напрямую — TRELLIS, TripoSG (картинка/скетч), Hunyuan3D-2/2.1 (стадия 1 форма, стадия 2 форма + референс → текстура; turbo/mini/fast/multiview), StableFast3D (гейтед-веса), LGM / TriplaneGaussian (картинка → 3D Gaussian за секунды на классе RTX3080, потом меш); ретекстур — MV-Adapter Texturing или запекание через Fitting_Mesh_With_Multiview_Images (nvdiffrast).
+- Ставит камеры и оси: Stack Orbit Camera Poses, азимут (−180, 180], элевация (−90, 90), канон CRM Front/Back/Left/Right/Top/Down не переименовывать, при цепочке паков — явный Switch Axis; превью gsplat.js (3DGS) / three.js (меш); при ошибке OpenGL `eglInitialize failed` — `force_cuda_rasterize true`.
+- Знает окружение: установка через ComfyUI-Manager (или Comfy3D-WinPortable), пребилды Win10/11 + Python 3.12 + CUDA 12.4 + torch 2.5.1+cu124, `install.py`, для InstantNGP и NeRF/Marching_Cubes нужны VS Build Tools / gcc+g++; веса вручную — только в дерево Checkpoints, shipped `.json` не перезаписывать. Экспорт: `.obj` / `.ply` / `.glb`, 3DGS — `.ply`.
+
+**Когда использовать:** «есть одно фото → нужен 3D-ассет», только multiview-сет без реконструкции, ретекстур меша, диагностика упавшего 3D-прогона.
+
+**Команды:** `/model` (полная спека: multiview + route + nodes/files + export), `/multiview` (только виды), `/review`, `/fix`, `/mode`, `/debug`.
+
+**Гейты:** DAC7 — только заявленные чекпоинты (TRELLIS jetx/TRELLIS-image-large, TripoSG VAST-AI/TripoSG, InstantMesh TencentARC/InstantMesh, Hunyuan tencent/Hunyuan3D-2/2mini/2.1, MV-Adapter huanngzh/mv-adapter), гейтед-веса — только с принятыми terms/HF-токеном; DAC8 — только документированные диапазоны; DAC9 — лицензии моделей проверять до коммерческого использования; DAG7 — 3D-безопасность (никаких клонов реальных людей для обмана, оружейные детали — только с подтверждённым законным использованием, релиз/монетизация — только с правами).
+
 ### Общие принципы всех ролей
 
 - **Minimum Viable Rules:** правило добавляется только под явное требование, наблюдаемый сбой или измеримую деградацию.
@@ -123,7 +141,7 @@ PROTOS 1.2.1  (корень, мета-генератор ролей, для аг
 
 1. Выберите роль под задачу (см. схему выше).
 2. Скопируйте XML целиком как первое сообщение / системный промпт чата или агента.
-3. Работайте командами роли (`/role`, `/song`, `/post`, …).
+3. Работайте командами роли (`/role`, `/song`, `/model`, `/post`, …).
 4. Помните: текст роли — это предложение, пока хост его не загрузил и вы не проверили результат.
 
 Лицензия: Apache 2.0 (см. `LICENSE`).
@@ -148,13 +166,14 @@ All roles inherit from one root — **PROTOS**. The rest are either its compact 
 ```
 PROTOS 1.2.1  (root, meta-generator of roles, for agents with tools)
 ├── DEMIURGOS 1.0.0  (compact PROTOS for plain web chats without tools)
-├── MEFISTOFEL 7.0.0 (leaf: VK copy)
+├── MEFISTOFEL 8.0.0 (leaf: VK copy)
 ├── WANGOG 4.0.0     (leaf: image prompts and posters)
-└── AMADEUS 1.0.0    (leaf: songs and workflows for ComfyUI YuE2)
+├── AMADEUS 1.0.0    (leaf: songs and workflows for ComfyUI YuE2)
+└── DAEDALUS 1.0.0   (leaf: multiview-3D and workflows for ComfyUI-3D-Pack)
 ```
 
 * Generators (`PROTOS`, `DEMIURGOS`) can create new roles.
-* Leaf roles (`MEFISTOFEL`, `WANGOG`, `AMADEUS`) never generate roles — only artifacts of their domain.
+* Leaf roles (`MEFISTOFEL`, `WANGOG`, `AMADEUS`, `DAEDALUS`) never generate roles — only artifacts of their domain.
 * Each role has its own ID namespace (`C*/G*/P*/R*`, `DP*/DC*/DG*/DR*`, `MC*/MG*/MD*`, `WC*/WG*/WD*`, `AMC*/AMG*/AMD*`) so cross-role audits stay unambiguous.
 
 ### Roles in detail
@@ -190,22 +209,23 @@ PROTOS 1.2.1  (root, meta-generator of roles, for agents with tools)
 
 **DELTA vs PROTOS:** fresh `DP*/DC*/DG*/DR*/DA1` namespace; simplified validation DR6; explicit `web_assumption`; child-artifact budget target ≤2500 tokens.
 
-#### 3. MEFISTOFEL `MEFISTOFEL.xml` — v7.0.0, ~5660 tokens
+#### 3. MEFISTOFEL `MEFISTOFEL.xml` — v8.0.0, ~9280 tokens
 
-**Who:** VK Post and Article Writer-Editor. Copywriter tuned for VK ranking.
+**Who:** VK Content Editor — evidence-aware Russian social content.
 
 **What it does:**
-- Writes and edits wall posts and articles: density over water, hook in the first lines, opinion labelled as opinion, confident, mildly provocative, never aggressive tone.
-- Knows the domain: VK smart-feed signals (saves, shares, discussion > likes), link hygiene (external link in the body kills reach — first comment only), hashtags ≤3–5, anti-AI patterns, mandatory «ё».
+- Writes and edits wall posts and articles against a stated publication objective (inform / explain / compare / teach / opinion / case / announce / discuss / convert): density over water, hook with substantive value, opinion separated from fact, expert-practitioner tone without aggression or artificial controversy.
+- Replaces reach folklore with the MD1 epistemic model: `FACT` / `USER_CLAIM` / `HYPOTHESIS` / `OPINION` / `UNKNOWN`. Confident prose never upgrades USER_CLAIM or HYPOTHESIS to FACT (MC7); labels are internal by default and surface when uncertainty is material or when the user asks for fact-checking.
+- Knows the domain: VK smart-feed signals as categories (SPEC-grade only where VK actually discloses), link and hashtag hygiene driven by the objective rather than "rules", anti-AI patterns, normative «ё».
 - Outputs draft text only (post + optional first comment), never publishes.
 
-**When to use:** you need a VK post/article with maximum organic reach.
+**When to use:** you need a VK post/article for a specific goal, without invented statistics or bait mechanics.
 
-**Commands:** `/post`, `/article`, `/review`, `/fix`, `/mode`, `/debug`. SHORT / MEDIUM / LONG length classes.
+**Commands:** `/post`, `/edit`, `/review`, `/audit` (fact-check with explicit labels), `/mode`, `/debug`. SHORT / MEDIUM / LONG / ARTICLE as editorial references, not platform requirements.
 
-**Honesty:** VK discloses signals, not exact weights — the role uses a qualitative signal heuristic, and reach forecasts are always `NOT_VERIFIED`. Sources cited: `vk.com/legal/recommendations`, `ads.vk.com/insights/...`, ppc.world analysis 08.07.2026. Numeric multipliers like "×4" from old v6.0 were removed as unverified.
+**Honesty and demotions:** VK publishes no ranking weights, so v7's "links only in the first comment", "≤5 hashtags", "3 lines per screen", "87% mobile traffic", "×2–3 impressions", and "120-hour logout" are demoted to labelled recommendations instead of asserted as platform mechanics (MC8). SPEC-grade sources remain `vk.com/legal/recommendations` and `vk.company/ru/press/releases/12216/`; practitioner claims stay attributed (ppc.world 08.07.2026).
 
-**Safety:** MG7 — no illegal/hateful/deceptive content; unsourced facts are labelled, never passed off as verified.
+**Safety:** MG7 (retained from v7) — no aggression/hate/profanity/shock, no banned topics (alcohol, tobacco); real living private person in a risky framing → generalize, never identify; sexualization of minors → brief refusal; чужой characters/logos → generic traits only.
 
 #### 4. WANGOG `WANGOG.xml` — v4.0.0, ~5900 tokens
 
@@ -235,6 +255,22 @@ PROTOS 1.2.1  (root, meta-generator of roles, for agents with tools)
 **Commands:** `/song` (full spec), `/cover` (transcription-first via SheetSage2, never audio-to-audio), `/review`, `/fix`, `/mode`, `/debug`.
 
 **Gates:** AMC7 — only stated checkpoints, no invented filenames/hashes; AMC8 — only documented parameters; AMC9 — license (personal/creator incl. monetization free, academic non-commercial, company commercial use needs a commercial license); AMG7 — music safety (no illegal/hateful content, covers personal/learning only without release rights, never pass off чужой vocal).
+
+#### 6. DAEDALUS `DAEDALUS.xml` — v1.0.0, ~6630 tokens
+
+**Who:** ComfyUI Multiview-3D Modelwright and Pipeline Operator. Multiview-pipeline operator for ComfyUI-3D-Pack.
+
+**What it does:**
+- Builds a multiview set from one photo or text: Zero123++ (1→6 views, 320 — cheap baseline), Era3D (1→6 views + normals, 512, needs ≥16 GB VRAM), Wonder3D, Unique3D (4 stages: 256 MV → 512 upscale → 2048 SR → normals → mesh), MV-Adapter IG2MV (image+mesh→views) / TG2MV (text+mesh→views).
+- Picks the reconstruction route (DAD3, one line — why): MV-first — InstantMesh (sparse white-bg views → textured mesh, pairs with Zero123++), CRM (6 views + CCMs → mesh, 3 stages separable on low VRAM), FlexiCubes (depth+mask+normals → mesh); direct — TRELLIS, TripoSG (image/scribble), Hunyuan3D-2/2.1 (stage 1 shape, stage 2 shape + reference → texture; turbo/mini/fast/multiview), StableFast3D (gated weights), LGM / TriplaneGaussian (image → 3D Gaussian in seconds on RTX3080-class, then mesh); re-texture — MV-Adapter Texturing or Fitting_Mesh_With_Multiview_Images bake (nvdiffrast).
+- Sets cameras and axes: Stack Orbit Camera Poses, azimuth (−180, 180], elevation (−90, 90), CRM canon Front/Back/Left/Right/Top/Down never renamed, explicit Switch Axis when chaining packs; preview gsplat.js (3DGS) / three.js (mesh); on OpenGL `eglInitialize failed` — `force_cuda_rasterize true`.
+- Knows the environment: install via ComfyUI-Manager (or Comfy3D-WinPortable), pre-builds Win10/11 + Python 3.12 + CUDA 12.4 + torch 2.5.1+cu124, `install.py`, VS Build Tools / gcc+g++ required for InstantNGP and NeRF/Marching_Cubes; manual weights only under the Checkpoints tree, never overwrite shipped `.json`. Export: `.obj` / `.ply` / `.glb`, 3DGS as `.ply`.
+
+**When to use:** "one photo → 3D asset", multiview-set-only without reconstruction, mesh re-texture, failed 3D-run diagnostics.
+
+**Commands:** `/model` (full spec: multiview + route + nodes/files + export), `/multiview` (views only), `/review`, `/fix`, `/mode`, `/debug`.
+
+**Gates:** DAC7 — only stated checkpoints (TRELLIS jetx/TRELLIS-image-large, TripoSG VAST-AI/TripoSG, InstantMesh TencentARC/InstantMesh, Hunyuan tencent/Hunyuan3D-2/2mini/2.1, MV-Adapter huanngzh/mv-adapter), gated weights only with accepted terms/HF token; DAC8 — only documented ranges; DAC9 — check each model's license before commercial use; DAG7 — 3D safety (no real-person likeness cloning for deception, weaponizable parts only with confirmed lawful use, release/monetization only with rights).
 
 ### Principles shared by all roles
 
@@ -272,14 +308,15 @@ License: Apache 2.0 (see `LICENSE`).
 ```
 PROTOS 1.2.1  （根，角色元生成器，面向带工具的 agent）
 ├── DEMIURGOS 1.0.0  （精简版 PROTOS，面向无工具的普通网页聊天）
-├── MEFISTOFEL 7.0.0 （叶子：VK 文案）
+├── MEFISTOFEL 8.0.0 （叶子：VK 文案）
 ├── WANGOG 4.0.0     （叶子：图像提示词与海报）
-└── AMADEUS 1.0.0    （叶子：ComfyUI YuE2 歌曲与工作流）
+├── AMADEUS 1.0.0    （叶子：ComfyUI YuE2 歌曲与工作流）
+└── DAEDALUS 1.0.0   （叶子：ComfyUI-3D-Pack 多视图 3D 与工作流）
 ```
 
 * 生成器（`PROTOS`、`DEMIURGOS`）可以创建新角色。
-* 叶子角色（`MEFISTOFEL`、`WANGOG`、`AMADEUS`）不生成角色，只产出各自领域的制品。
-* 每个角色拥有独立 ID 命名空间（`C*/G*/P*/R*`、`DP*/DC*/DG*/DR*`、`MC*/MG*/MD*`、`WC*/WG*/WD*`、`AMC*/AMG*/AMD*`），跨角色审计不会混淆。
+* 叶子角色（`MEFISTOFEL`、`WANGOG`、`AMADEUS`、`DAEDALUS`）不生成角色，只产出各自领域的制品。
+* 每个角色拥有独立 ID 命名空间（`C*/G*/P*/R*`、`DP*/DC*/DG*/DR*`、`MC*/MG*/MD*`、`WC*/WG*/WD*`、`AMC*/AMG*/AMD*`、`DAC*/DAG*/DAD*`），跨角色审计不会混淆。
 
 ### 角色详解
 
@@ -314,22 +351,23 @@ PROTOS 1.2.1  （根，角色元生成器，面向带工具的 agent）
 
 **相对 PROTOS 的 DELTA：** 新命名空间 `DP*/DC*/DG*/DR*/DA1`；验证 DR6 简化；显式 `web_assumption`；子制品目标 ≤2500 tokens。
 
-#### 3. MEFISTOFEL `MEFISTOFEL.xml` — v7.0.0，约 5660 tokens
+#### 3. MEFISTOFEL `MEFISTOFEL.xml` — v8.0.0，约 9280 tokens
 
-**身份：** VK Post and Article Writer-Editor，面向 VK 算法的文案编辑。
+**身份：** VK Content Editor — evidence-aware Russian social content，带显式认知模型的内容编辑。
 
 **做什么：**
-- 写 VK 动态与文章：密度优先、拒绝水话、开头即钩子、观点与事实分开、自信、微挑衅但不攻击。
-- 懂领域：VK 智能推荐信号（收藏、转发、讨论 > 点赞）、链接卫生（正文外链杀 reach，只能放首条评论）、话题标签 ≤3–5、反 AI 腔、强制«ё»。
+- 按明确的发布目标写/改 VK 动态与文章（inform / explain / compare / teach / opinion / case / announce / discuss / convert）：密度优先、开头即钩子且钩子必须有正文支撑、观点与事实分开、专家实践者口吻、不攻击也不制造对立。
+- 用 MD1 认知模型取代"reach 传说"：`FACT` / `USER_CLAIM` / `HYPOTHESIS` / `OPINION` / `UNKNOWN`。自信的语气不能把 USER_CLAIM 或 HYPOTHESIS 变成 FACT（MC7）；标签默认内部使用，只在不确定性实质存在或用户要求事实核查时才显式输出。
+- 懂领域：VK 智能推荐信号只按 VK 真正公开的类别陈述、链接与话题标签围绕发布目标而非"规矩"、反 AI 腔、规范«ё»。
 - 只输出草稿文本（正文 + 可选首评），绝不代发布。
 
-**何时用：** 需要一篇追求自然流量的 VK 帖子/文章。
+**何时用：** 需要一篇目标明确、不含编造统计、不靠 bait 机制的 VK 帖子/文章。
 
-**命令：** `/post`、`/article`、`/review`、`/fix`、`/mode`、`/debug`。SHORT / MEDIUM / LONG 篇幅分级。
+**命令：** `/post`、`/edit`、`/review`、`/audit`（带显式标签的事实核查）、`/mode`、`/debug`。SHORT / MEDIUM / LONG / ARTICLE 为编辑参考区间，不是平台要求。
 
-**诚实性：** VK 只公开信号不公开权重——本角色只用定性信号启发式，reach 预测一律标 `NOT_VERIFIED`。引用来源：`vk.com/legal/recommendations`、`ads.vk.com/insights/...`、ppc.world 2026-07-08 复盘。旧 v6.0 中的"×4"等数字权重已作为未验证删除。
+**诚实性与降级：** VK 不公开排序权重，因此 v7 的"链接只能放首评""≤5 个话题标签""一屏 3 行""87% 移动端流量""×2–3 展示""注销 120 小时"全部降级为带标注的推荐，不再当作平台机制陈述（MC8）。SPEC 级来源保留 `vk.com/legal/recommendations` 与 `vk.company/ru/press/releases/12216/`，实践类结论归属到作者（ppc.world 2026-07-08）。
 
-**安全：** MG7 禁止违法/仇恨/欺骗内容；无来源事实必须标注，不得冒充已验证。
+**安全：** MG7（从 v7 保留）禁攻击/仇恨/粗话/震惊钩子与违禁话题（酒精、烟草）；真实私人人物在风险语境中只做泛化、不做指认；未成年人性化直接简短拒绝；他人角色/商标只取泛化特征。
 
 #### 4. WANGOG `WANGOG.xml` — v4.0.0，约 5900 tokens
 
@@ -360,6 +398,22 @@ PROTOS 1.2.1  （根，角色元生成器，面向带工具的 agent）
 
 **门控：** AMC7 只引用已声明 checkpoint，不编文件名/hash；AMC8 只用文档化参数；AMC9 许可（个人/创作者含变现免费、学术非商用、公司商用权重需商业许可）；AMG7 音乐安全（禁违法/仇恨内容，翻唱默认仅 personal/learning，发行需确权，不冒充他人声音）。
 
+#### 6. DAEDALUS `DAEDALUS.xml` — v1.0.0，约 6630 tokens
+
+**身份：** ComfyUI Multiview-3D Modelwright and Pipeline Operator，ComfyUI-3D-Pack 多视图 3D 管线操作员。
+
+**做什么：**
+- 从单张图或文本构建多视图集：Zero123++（1→6 视图，320，便宜基线）、Era3D（1→6 视图 + 法线，512，需 ≥16GB 显存）、Wonder3D、Unique3D（4 阶段：256 MV → 512 放大 → 2048 超分 → 法线 → 网格）、MV-Adapter IG2MV（图+网格→视图）/ TG2MV（文+网格→视图）。
+- 选择重建路线（DAD3 一行说明理由）：MV 优先 — InstantMesh（稀疏白底视图 → 带纹理网格，与 Zero123++ 配对）、CRM（6 视图 + CCM → 网格，3 阶段可在低显存下拆分）、FlexiCubes（深度+mask+法线 → 网格）；直连 — TRELLIS、TripoSG（图像/草图）、Hunyuan3D-2/2.1（阶段 1 形状，阶段 2 形状+参考 → 纹理；turbo/mini/fast/multiview）、StableFast3D（受限权重）、LGM / TriplaneGaussian（图像 → 3D Gaussian，RTX3080 级秒级，之后转网格）；重纹理 — MV-Adapter Texturing 或 Fitting_Mesh_With_Multiview_Images 烘焙（nvdiffrast）。
+- 设定相机与轴向：Stack Orbit Camera Poses，方位角 (−180, 180]，仰角 (−90, 90)，CRM 规范 Front/Back/Left/Right/Top/Down 不改名，串联不同 pack 时显式 Switch Axis；预览 gsplat.js（3DGS）/ three.js（网格）；OpenGL 报 `eglInitialize failed` 时 `force_cuda_rasterize true`。
+- 懂环境：经 ComfyUI-Manager 安装（或 Comfy3D-WinPortable），预编译版 Win10/11 + Python 3.12 + CUDA 12.4 + torch 2.5.1+cu124，`install.py`，InstantNGP 与 NeRF/Marching_Cubes 需要 VS Build Tools / gcc+g++；手动权重只放 Checkpoints 目录树，绝不覆盖随包的 `.json`。导出 `.obj` / `.ply` / `.glb`，3DGS 用 `.ply`。
+
+**何时用：** "一张照片 → 3D 资产"、只要多视图集不做重建、网格重纹理、3D 流程失败排查。
+
+**命令：** `/model`（完整规格：多视图 + 路线 + 节点/文件 + 导出）、`/multiview`（只出视图）、`/review`、`/fix`、`/mode`、`/`debug`。
+
+**门控：** DAC7 只引用已声明 checkpoint（TRELLIS jetx/TRELLIS-image-large、TripoSG VAST-AI/TripoSG、InstantMesh TencentARC/InstantMesh、Hunyuan tencent/Hunyuan3D-2/2mini/2.1、MV-Adapter huanngzh/mv-adapter），受限权重需先接受条款/HF token；DAC8 只用文档化参数范围；DAC9 商用前逐个查模型许可；DAG7 3D 安全（不做真人换脸式欺骗克隆、致命部件需确认合法用途、发行/变现需确权）。
+
 ### 所有角色的共同原则
 
 - **Minimum Viable Rules：** 只有在明确需求、观测到的失败或可测量的退化下才加规则。
@@ -371,7 +425,7 @@ PROTOS 1.2.1  （根，角色元生成器，面向带工具的 agent）
 
 1. 按上图选角色。
 2. 把整个 XML 作为聊天/agent 的首条消息 / system prompt 粘贴。
-3. 用角色命令工作（`/role`、`/song`、`/post`…）。
+3. 用角色命令工作（`/role`、`/song`、`/model`、`/post`…）。
 4. 记住：角色文本在宿主加载并验证结果之前，只是一份提议。
 
 License: Apache 2.0（见 `LICENSE`）。
