@@ -27,12 +27,13 @@ PROTOS 1.2.1  (корень, мета-генератор ролей, для аг
 ├── MEFISTOFEL 8.0.0 (листовой: тексты для VK)
 ├── WANGOG 4.0.0     (листовой: промпты для генерации изображений и постеры)
 ├── AMADEUS 1.0.0    (листовой: песни и workflow для ComfyUI YuE2)
-└── DAEDALUS 1.0.0   (листовой: multiview-3D и workflow для ComfyUI-3D-Pack)
+├── DAEDALUS 1.0.0   (листовой: multiview-3D и workflow для ComfyUI-3D-Pack)
+└── PLAYCANVAS 1.0.0 (листовой: браузерные мультиплеерные 3D-игры на PlayCanvas Engine)
 ```
 
 * Генераторы (`PROTOS`, `DEMIURGOS`) умеют создавать новые роли.
-* Листовые роли (`MEFISTOFEL`, `WANGOG`, `AMADEUS`, `DAEDALUS`) новых ролей не создают — только артефакты своего домена.
-* У каждой роли свой неймспейс ID (`C*/G*/P*/R*` у PROTOS, `DP*/DC*/DG*/DR*` у DEMIURGOS, `MC*/MG*/MD*` у MEFISTOFEL, `WC*/WG*/WD*` у WANGOG, `AMC*/AMG*/AMD*` у AMADEUS, `DAC*/DAG*/DAD*` у DAEDALUS), чтобы аудит между ролями не путался.
+* Листовые роли (`MEFISTOFEL`, `WANGOG`, `AMADEUS`, `DAEDALUS`, `PLAYCANVAS`) новых ролей не создают — только артефакты своего домена.
+* У каждой роли свой неймспейс ID (`C*/G*/P*/R*` у PROTOS, `DP*/DC*/DG*/DR*` у DEMIURGOS, `MC*/MG*/MD*` у MEFISTOFEL, `WC*/WG*/WD*` у WANGOG, `AMC*/AMG*/AMD*` у AMADEUS, `DAC*/DAG*/DAD*` у DAEDALUS, `PCP*/PCC*/PCG*/PCD*` у PLAYCANVAS), чтобы аудит между ролями не путался.
 
 ### Роли детально
 
@@ -130,6 +131,23 @@ PROTOS 1.2.1  (корень, мета-генератор ролей, для аг
 
 **Гейты:** DAC7 — только заявленные чекпоинты (TRELLIS jetx/TRELLIS-image-large, TripoSG VAST-AI/TripoSG, InstantMesh TencentARC/InstantMesh, Hunyuan tencent/Hunyuan3D-2/2mini/2.1, MV-Adapter huanngzh/mv-adapter), гейтед-веса — только с принятыми terms/HF-токеном; DAC8 — только документированные диапазоны; DAC9 — лицензии моделей проверять до коммерческого использования; DAG7 — 3D-безопасность (никаких клонов реальных людей для обмана, оружейные детали — только с подтверждённым законным использованием, релиз/монетизация — только с правами).
 
+#### 7. PLAYCANVAS `PLAYCANVAS.xml` — v1.0.0, ~5550 токенов
+
+**Кто:** Browser Multiplayer 3D Game Developer on PlayCanvas. Листовой разработчик браузерных мультиплеерных 3D-игр на PlayCanvas Engine (standalone Engine + npm-инструментарий).
+
+**Что делает:**
+- Поднимает проект по-правильному: `npm create playcanvas@latest my-app -- -f engine` (Vite + TypeScript), а для standalone-буквара — строгий порядок: `pc.createGraphicsDevice` (WebGPU с fallback на WebGL2) → `new pc.AppOptions()` с `graphicsDevice`, нужными `componentSystems` и `resourceHandlers` → `new pc.AppBase(canvas)` + `app.init(options)`; помнит, что в Engine input опционален (`app.keyboard`), а ресайз canvas обрабатывает приложение.
+- Строит архитектуру на ECS: компоненты как данные + ESM-скрипты (`import { Script } from 'playcanvas'`, `initialize/update(dt)`), и сначала проверяет готовые production-скрипты из `playcanvas/scripts/*` (камера, контроллер персонажа, tweens, вода, скай, пост-эффекты, XR) и официальный Engine Examples — port, а не import.
+- Проектирует неткод под жанр: авторитарный клиент-сервер по умолчанию для соревновательных игр (клиент только предсказывает, сервер — источник истины), relay — только для кооперативных прототипов, P2P через WebRTC data channels — для казуальных сессий на 2–4 игрока (со стоимостью NAT traversal и host migration). Транспорт: WebSockets (TCP, надёжно, но head-of-line blocking) или WebRTC dc (UDP-like, ненадёжный/неупорядоченный) — никакого сырого UDP в браузере нет.
+- Держит перфоманс-бюджет: сначала измерение через MiniStats и `app.stats` (frameTime, drawCallCount, cpuUpdateTime, gpuFrameTime, vramTotalBytes) на повторяемом сценарии, потом по дешевизне: прекллокация Vec3/Mat4/Quat в `initialize` (per-frame `new` → GC-сталы), `enabled = false` на невидимом, батчинг и контроль draw calls, DPR, свет, шейдеры.
+- Доказывает работу запусками: static (TS/lint) → Node headless (`NullGraphicsDevice`, `app.update(dt)` на `setInterval` — `app.start()` не крутит цикл в Node) → браузер с консолью и AppStats; для неткода — сервер + ≥2 клиента под искусственной задержкой и потерями; для рендера-изменений — детерминированное пиксельное сравнение (`app.autoRender = false`, `renderNextFrame`, сеяная случайность, `readPixelsAsync` / `Texture#read`).
+
+**Когда использовать:** делаете браузерную 3D-игру (одиночную или мультиплеерную) на PlayCanvas Engine —bootstrap, ECS/скрипты, неткод, перфоманс-бюджет, или нужен честный evidence-отчёт вместо «should work».
+
+**Команды:** `/bootstrap` (скаффолд/аудит проекта: create-playcanvas, AppOptions, компоненты и хендлеры, input, resize, lifecycle), `/netcode` (авторитарная модель, транспорт, tick rate, prediction/interpolation/reconciliation, выбор фреймворка — по умолчанию Colyseus), `/perf` (базлайн через AppStats/MiniStats, потом draw calls, аллокации, шейдеры, DPR, свет), `/verify` (headless Node или браузерный harness, консоль, AppStats, пиксель-сравнение), `/review`, `/mode lite|full`, `/debug full|safety|plan|perf|netcode`.
+
+**Гейты:** PCC7 — API honesty: использовать только классы/компоненты/хендлеры, которые есть в установленном пакете или официальном API reference для целевой версии (придуманный вызов — это FAIL, «наверное, есть» — NOT_VERIFIED); PCC8 — server authority: клиентский стейт (позиция, здоровье, счёт, инвентарь) — это input для валидации, а не факт; PCC9 — транспорт и неткод под жанр, а не по привычке; PCC10 — измеряй до оптимизации (базлайн обязателен); PCG7 — изменение рантайма не завершено по статике — нужен реальный запуск; PCG8 — анти-чит, лаг-компенсация и корректность синхронизации не заявляются из чтения кода — только сервер + ≥2 клиента под задержкой; PCC2 — клиентский бандл публичен, секретов в браузер не.shipить.
+
 ### Общие принципы всех ролей
 
 - **Minimum Viable Rules:** правило добавляется только под явное требование, наблюдаемый сбой или измеримую деградацию.
@@ -169,12 +187,13 @@ PROTOS 1.2.1  (root, meta-generator of roles, for agents with tools)
 ├── MEFISTOFEL 8.0.0 (leaf: VK copy)
 ├── WANGOG 4.0.0     (leaf: image prompts and posters)
 ├── AMADEUS 1.0.0    (leaf: songs and workflows for ComfyUI YuE2)
-└── DAEDALUS 1.0.0   (leaf: multiview-3D and workflows for ComfyUI-3D-Pack)
+├── DAEDALUS 1.0.0   (leaf: multiview-3D and workflows for ComfyUI-3D-Pack)
+└── PLAYCANVAS 1.0.0 (leaf: browser multiplayer 3D games on the PlayCanvas Engine)
 ```
 
 * Generators (`PROTOS`, `DEMIURGOS`) can create new roles.
-* Leaf roles (`MEFISTOFEL`, `WANGOG`, `AMADEUS`, `DAEDALUS`) never generate roles — only artifacts of their domain.
-* Each role has its own ID namespace (`C*/G*/P*/R*`, `DP*/DC*/DG*/DR*`, `MC*/MG*/MD*`, `WC*/WG*/WD*`, `AMC*/AMG*/AMD*`) so cross-role audits stay unambiguous.
+* Leaf roles (`MEFISTOFEL`, `WANGOG`, `AMADEUS`, `DAEDALUS`, `PLAYCANVAS`) never generate roles — only artifacts of their domain.
+* Each role has its own ID namespace (`C*/G*/P*/R*`, `DP*/DC*/DG*/DR*`, `MC*/MG*/MD*`, `WC*/WG*/WD*`, `AMC*/AMG*/AMD*`, `DAC*/DAG*/DAD*`, `PCP*/PCC*/PCG*/PCD*`) so cross-role audits stay unambiguous.
 
 ### Roles in detail
 
@@ -272,6 +291,23 @@ PROTOS 1.2.1  (root, meta-generator of roles, for agents with tools)
 
 **Gates:** DAC7 — only stated checkpoints (TRELLIS jetx/TRELLIS-image-large, TripoSG VAST-AI/TripoSG, InstantMesh TencentARC/InstantMesh, Hunyuan tencent/Hunyuan3D-2/2mini/2.1, MV-Adapter huanngzh/mv-adapter), gated weights only with accepted terms/HF token; DAC8 — only documented ranges; DAC9 — check each model's license before commercial use; DAG7 — 3D safety (no real-person likeness cloning for deception, weaponizable parts only with confirmed lawful use, release/monetization only with rights).
 
+#### 7. PLAYCANVAS `PLAYCANVAS.xml` — v1.0.0, ~5550 tokens
+
+**Who:** Browser Multiplayer 3D Game Developer on PlayCanvas. Leaf role for browser-first multiplayer 3D games on the PlayCanvas Engine (standalone Engine + npm toolchain).
+
+**What it does:**
+- Scaffolds projects correctly: `npm create playcanvas@latest my-app -- -f engine` (Vite + TypeScript), and for standalone bootstrap the strict order: `pc.createGraphicsDevice` (WebGPU with WebGL2 fallback) → `new pc.AppOptions()` with `graphicsDevice`, only the needed `componentSystems` and `resourceHandlers` → `new pc.AppBase(canvas)` + `app.init(options)`; remembers Engine specifics that bite — input is opt-in (`app.keyboard`), canvas resize is the app's job.
+- Structures code as ECS: components as data plus ESM scripts (`import { Script } from 'playcanvas'`, `initialize/update(dt)`), and checks the bundled production scripts under `playcanvas/scripts/*` (camera, character controller, tweens, water, sky, post effects, XR) and the official Engine Examples first — port, don't import.
+- Designs netcode to genre: authoritative client-server by default for anything competitive or cheat-sensitive (clients predict, the server is the source of truth); relay only for cooperative prototypes; P2P over WebRTC data channels for 2–4 player casual sessions (with the cost of NAT traversal and host migration). Transport: WebSockets (reliable TCP, head-of-line blocking) or WebRTC dc (UDP-like, unreliable/unordered) — the browser has no raw UDP.
+- Holds a performance budget: measure first with MiniStats and `app.stats` (frameTime, drawCallCount, cpuUpdateTime, gpuFrameTime, vramTotalBytes) on a repeatable scenario, then apply cheapest-first: preallocate Vec3/Mat4/Quat in `initialize` (per-frame `new` → GC stalls), `enabled = false` on the invisible, batching and draw-call control, DPR, lights, shaders.
+- Proves it runs: static (TS/lint) → Node headless (`NullGraphicsDevice`, `app.update(dt)` on `setInterval` — `app.start()` runs no loop in Node) → browser with console + AppStats; for netcode — server + ≥2 clients under induced latency and loss; for render changes — deterministic pixel comparison (`app.autoRender = false`, `renderNextFrame`, seeded randomness, `readPixelsAsync` / `Texture#read`).
+
+**When to use:** building a browser 3D game (single- or multiplayer) on the PlayCanvas Engine — bootstrap, ECS/scripts, netcode, performance budgets — or when you need an honest evidence report instead of "should work".
+
+**Commands:** `/bootstrap` (scaffold/audit a project: create-playcanvas, AppOptions, component systems and handlers, input, resize, lifecycle), `/netcode` (authority model, transport, tick rate, prediction/interpolation/reconciliation, framework choice — Colyseus by default), `/perf` (baseline via AppStats/MiniStats, then draw calls, allocations, shaders, DPR, lights), `/verify` (headless Node or browser harness, console capture, AppStats, pixel compare), `/review`, `/mode lite|full`, `/debug full|safety|plan|perf|netcode`.
+
+**Gates:** PCC7 — API honesty: use only classes/components/handlers that exist in the installed package or the official API reference for the target version (an invented call is a FAIL, "probably exists" is NOT_VERIFIED); PCC8 — server authority: client-reported state (position, health, score, inventory) is input to validate, never fact; PCC9 — transport and netcode matched to genre, not familiarity; PCC10 — measure before optimizing (baseline mandatory); PCG7 — a runtime change is not complete on static review — a real run is required; PCG8 — anti-cheat, lag compensation and sync correctness are never claimed from reading code — only server + ≥2 clients under latency; PCC2 — the client bundle is public, so no secrets ship to the browser.
+
 ### Principles shared by all roles
 
 - **Minimum Viable Rules:** a rule is added only for an explicit requirement, observed failure, or measurable degradation.
@@ -311,12 +347,13 @@ PROTOS 1.2.1  （根，角色元生成器，面向带工具的 agent）
 ├── MEFISTOFEL 8.0.0 （叶子：VK 文案）
 ├── WANGOG 4.0.0     （叶子：图像提示词与海报）
 ├── AMADEUS 1.0.0    （叶子：ComfyUI YuE2 歌曲与工作流）
-└── DAEDALUS 1.0.0   （叶子：ComfyUI-3D-Pack 多视图 3D 与工作流）
+├── DAEDALUS 1.0.0   （叶子：ComfyUI-3D-Pack 多视图 3D 与工作流）
+└── PLAYCANVAS 1.0.0 （叶子：基于 PlayCanvas Engine 的浏览器多人 3D 游戏）
 ```
 
 * 生成器（`PROTOS`、`DEMIURGOS`）可以创建新角色。
-* 叶子角色（`MEFISTOFEL`、`WANGOG`、`AMADEUS`、`DAEDALUS`）不生成角色，只产出各自领域的制品。
-* 每个角色拥有独立 ID 命名空间（`C*/G*/P*/R*`、`DP*/DC*/DG*/DR*`、`MC*/MG*/MD*`、`WC*/WG*/WD*`、`AMC*/AMG*/AMD*`、`DAC*/DAG*/DAD*`），跨角色审计不会混淆。
+* 叶子角色（`MEFISTOFEL`、`WANGOG`、`AMADEUS`、`DAEDALUS`、`PLAYCANVAS`）不生成角色，只产出各自领域的制品。
+* 每个角色拥有独立 ID 命名空间（`C*/G*/P*/R*`、`DP*/DC*/DG*/DR*`、`MC*/MG*/MD*`、`WC*/WG*/WD*`、`AMC*/AMG*/AMD*`、`DAC*/DAG*/DAD*`、`PCP*/PCC*/PCG*/PCD*`），跨角色审计不会混淆。
 
 ### 角色详解
 
@@ -413,6 +450,23 @@ PROTOS 1.2.1  （根，角色元生成器，面向带工具的 agent）
 **命令：** `/model`（完整规格：多视图 + 路线 + 节点/文件 + 导出）、`/multiview`（只出视图）、`/review`、`/fix`、`/mode`、`/`debug`。
 
 **门控：** DAC7 只引用已声明 checkpoint（TRELLIS jetx/TRELLIS-image-large、TripoSG VAST-AI/TripoSG、InstantMesh TencentARC/InstantMesh、Hunyuan tencent/Hunyuan3D-2/2mini/2.1、MV-Adapter huanngzh/mv-adapter），受限权重需先接受条款/HF token；DAC8 只用文档化参数范围；DAC9 商用前逐个查模型许可；DAG7 3D 安全（不做真人换脸式欺骗克隆、致命部件需确认合法用途、发行/变现需确权）。
+
+#### 7. PLAYCANVAS `PLAYCANVAS.xml` — v1.0.0，约 5550 tokens
+
+**身份：** Browser Multiplayer 3D Game Developer on PlayCanvas，基于 PlayCanvas Engine（独立 Engine + npm 工具链）的浏览器多人 3D 游戏开发叶子角色。
+
+**做什么：**
+- 按规范搭建项目：`npm create playcanvas@latest my-app -- -f engine`（Vite + TypeScript）；独立启动严格顺序为 `pc.createGraphicsDevice`（WebGPU，回退 WebGL2）→ `new pc.AppOptions()` 设置 `graphicsDevice`、只注册用到的 `componentSystems` 与 `resourceHandlers` → `new pc.AppBase(canvas)` + `app.init(options)`；牢记 Engine 的坑点——input 默认不启用（`app.keyboard`），canvas 的 resize 由应用处理。
+- 以 ECS 组织代码：组件即数据，逻辑放进 ESM 脚本（`import { Script } from 'playcanvas'`、`initialize/update(dt)`）；先复用 `playcanvas/scripts/*` 下的官方生产脚本（相机、角色控制器、tween、水、天空、后效、XR）与官方 Engine Examples——移植而非导入。
+- 按品类设计 netcode：竞技或防作弊场景默认权威客户端-服务器（客户端只做预测，服务器是唯一真相源）；relay 仅限合作原型；2–4 人休闲对局可用 WebRTC data channels 的 P2P（代价是 NAT 穿透与 host 迁移）。传输层：WebSockets（可靠有序 TCP，但有 head-of-line blocking）或 WebRTC dc（类 UDP，不可靠/无序）——浏览器没有原始 UDP。
+- 守住性能预算：先用 MiniStats 与 `app.stats`（frameTime、drawCallCount、cpuUpdateTime、gpuFrameTime、vramTotalBytes）在可复现场景下测量，再按成本从低到高优化：在 `initialize` 预分配 Vec3/Mat4/Quat（每帧 `new` 会触发 GC 卡顿）、不可见对象设 `enabled = false`、批处理与 draw call 控制、DPR、灯光、shader。
+- 用运行证明：static（TS/lint）→ Node headless（`NullGraphicsDevice`，用 `setInterval` 驱动 `app.update(dt)`——Node 下 `app.start()` 不会跑主循环）→ 浏览器真实运行并抓 console + AppStats；netcode 需服务器 + ≥2 客户端在人为延迟/丢包下验证；渲染变更用确定性像素比对（`app.autoRender = false`、`renderNextFrame`、随机种子、`readPixelsAsync` / `Texture#read`）。
+
+**何时用：** 基于 PlayCanvas Engine 做浏览器 3D 游戏（单机或多人）——引导搭建、ECS/脚本、netcode、性能预算——或需要一份诚实的 evidence 报告而不是「should work」。
+
+**命令：** `/bootstrap`（搭建或审计项目：create-playcanvas、AppOptions、组件系统与 handler、input、resize、生命周期）、`/netcode`（权威模型、传输、tick rate、预测/插值/和解、框架选型——默认 Colyseus）、`/perf`（先用 AppStats/MiniStats 建基线，再处理 draw calls、分配、shader、DPR、灯光）、`/verify`（headless Node 或浏览器 harness、console、AppStats、像素比对）、`/review`、`/mode lite|full`、`/debug full|safety|plan|perf|netcode`。
+
+**门控：** PCC7 API 诚实：只使用已安装包或目标版本官方 API reference 中存在的类/组件/handler（编造调用即 FAIL，「大概存在」即 NOT_VERIFIED）；PCC8 服务器权威：客户端上报的状态（位置、血量、分数、背包）只能作为待校验输入，绝不能当事实；PCC9 传输与 netcode 按品类匹配而非按习惯；PCC10 先测量再优化（基线必填）；PCG7 运行时变更不能只靠静态审查结案——必须有真实运行；PCG8 防作弊、延迟补偿与同步正确性不能靠读代码断言——只有服务器 + ≥2 客户端在延迟下验证才算；PCC2 客户端包是公开的，浏览器里不夹带任何密钥。
 
 ### 所有角色的共同原则
 
