@@ -28,7 +28,7 @@ PROTOS 1.2.1  (корень, мета-генератор ролей, для аг
 ├── WANGOG 4.0.0     (листовой: промпты для генерации изображений и постеры)
 ├── AMADEUS 1.0.0    (листовой: песни и workflow для ComfyUI YuE2)
 ├── DAEDALUS 1.0.0   (листовой: multiview-3D и workflow для ComfyUI-3D-Pack)
-└── PLAYCANVAS 1.0.0 (листовой: браузерные мультиплеерные 3D-игры на PlayCanvas Engine)
+└── PLAYCANVAS 1.1.0 (листовой: браузерные мультиплеерные 3D-игры на PlayCanvas Engine)
 ```
 
 * Генераторы (`PROTOS`, `DEMIURGOS`) умеют создавать новые роли.
@@ -131,7 +131,7 @@ PROTOS 1.2.1  (корень, мета-генератор ролей, для аг
 
 **Гейты:** DAC7 — только заявленные чекпоинты (TRELLIS jetx/TRELLIS-image-large, TripoSG VAST-AI/TripoSG, InstantMesh TencentARC/InstantMesh, Hunyuan tencent/Hunyuan3D-2/2mini/2.1, MV-Adapter huanngzh/mv-adapter), гейтед-веса — только с принятыми terms/HF-токеном; DAC8 — только документированные диапазоны; DAC9 — лицензии моделей проверять до коммерческого использования; DAG7 — 3D-безопасность (никаких клонов реальных людей для обмана, оружейные детали — только с подтверждённым законным использованием, релиз/монетизация — только с правами).
 
-#### 7. PLAYCANVAS `PLAYCANVAS.xml` — v1.0.0, ~5550 токенов
+#### 7. PLAYCANVAS `PLAYCANVAS.xml` — v1.1.0, ~8810 токенов
 
 **Кто:** Browser Multiplayer 3D Game Developer on PlayCanvas. Листовой разработчик браузерных мультиплеерных 3D-игр на PlayCanvas Engine (standalone Engine + npm-инструментарий).
 
@@ -188,7 +188,7 @@ PROTOS 1.2.1  (root, meta-generator of roles, for agents with tools)
 ├── WANGOG 4.0.0     (leaf: image prompts and posters)
 ├── AMADEUS 1.0.0    (leaf: songs and workflows for ComfyUI YuE2)
 ├── DAEDALUS 1.0.0   (leaf: multiview-3D and workflows for ComfyUI-3D-Pack)
-└── PLAYCANVAS 1.0.0 (leaf: browser multiplayer 3D games on the PlayCanvas Engine)
+└── PLAYCANVAS 1.1.0 (leaf: browser multiplayer 3D games on the PlayCanvas Engine)
 ```
 
 * Generators (`PROTOS`, `DEMIURGOS`) can create new roles.
@@ -291,7 +291,7 @@ PROTOS 1.2.1  (root, meta-generator of roles, for agents with tools)
 
 **Gates:** DAC7 — only stated checkpoints (TRELLIS jetx/TRELLIS-image-large, TripoSG VAST-AI/TripoSG, InstantMesh TencentARC/InstantMesh, Hunyuan tencent/Hunyuan3D-2/2mini/2.1, MV-Adapter huanngzh/mv-adapter), gated weights only with accepted terms/HF token; DAC8 — only documented ranges; DAC9 — check each model's license before commercial use; DAG7 — 3D safety (no real-person likeness cloning for deception, weaponizable parts only with confirmed lawful use, release/monetization only with rights).
 
-#### 7. PLAYCANVAS `PLAYCANVAS.xml` — v1.0.0, ~5550 tokens
+#### 7. PLAYCANVAS `PLAYCANVAS.xml` — v1.1.0, ~8810 tokens
 
 **Who:** Browser Multiplayer 3D Game Developer on PlayCanvas. Leaf role for browser-first multiplayer 3D games on the PlayCanvas Engine (standalone Engine + npm toolchain).
 
@@ -348,7 +348,7 @@ PROTOS 1.2.1  （根，角色元生成器，面向带工具的 agent）
 ├── WANGOG 4.0.0     （叶子：图像提示词与海报）
 ├── AMADEUS 1.0.0    （叶子：ComfyUI YuE2 歌曲与工作流）
 ├── DAEDALUS 1.0.0   （叶子：ComfyUI-3D-Pack 多视图 3D 与工作流）
-└── PLAYCANVAS 1.0.0 （叶子：基于 PlayCanvas Engine 的浏览器多人 3D 游戏）
+└── PLAYCANVAS 1.1.0 （叶子：基于 PlayCanvas Engine 的浏览器多人 3D 游戏）
 ```
 
 * 生成器（`PROTOS`、`DEMIURGOS`）可以创建新角色。
@@ -451,7 +451,7 @@ PROTOS 1.2.1  （根，角色元生成器，面向带工具的 agent）
 
 **门控：** DAC7 只引用已声明 checkpoint（TRELLIS jetx/TRELLIS-image-large、TripoSG VAST-AI/TripoSG、InstantMesh TencentARC/InstantMesh、Hunyuan tencent/Hunyuan3D-2/2mini/2.1、MV-Adapter huanngzh/mv-adapter），受限权重需先接受条款/HF token；DAC8 只用文档化参数范围；DAC9 商用前逐个查模型许可；DAG7 3D 安全（不做真人换脸式欺骗克隆、致命部件需确认合法用途、发行/变现需确权）。
 
-#### 7. PLAYCANVAS `PLAYCANVAS.xml` — v1.0.0，约 5550 tokens
+#### 7. PLAYCANVAS `PLAYCANVAS.xml` — v1.1.0，约 8810 tokens
 
 **身份：** Browser Multiplayer 3D Game Developer on PlayCanvas，基于 PlayCanvas Engine（独立 Engine + npm 工具链）的浏览器多人 3D 游戏开发叶子角色。
 
