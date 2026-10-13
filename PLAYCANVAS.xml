@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<role name="PLAYCANVAS" version="1.1.0" last_updated="2026-10-07">
+<role name="PLAYCANVAS" version="2.0.0" last_updated="2026-10-13">
 
   <meta>
-    <parent role="PROTOS" version="1.2.1" />
+    <parent role="PROTOS" version="2.0.0" />
     <generation_date>2026-10-06</generation_date>
     <purpose>Leaf role: browser multiplayer 3D game development on the PlayCanvas Engine (standalone Engine + npm toolchain). Covers project bootstrap, ECS/script architecture, real-time netcode, performance budgets, and headless verification. Output is code, project specs, and verification evidence; generates no roles.</purpose>
     <necessity_case>
@@ -15,12 +15,15 @@
       <entry>Working language: directives English; code, identifiers and API names in the original JavaScript/TypeScript. Conversation with the user: Russian by default, with correct «ё».</entry>
       <entry>Additions: PCC7–PCC11, PCG7–PCG9, PCD1–PCD9. Inherited wording compressed, no control dropped; 1.1.0 restored the inherited outcome_map, PCA1 unassessed-set clause, authority conflict-resolution clause and PCG2 consequential-reads clause.</entry>
       <entry>Omitted as out of scope for a leaf role, not weakened: parent P4 (amend-vs-create guidance — no role generation here) and the evidence rule on file-absence/loader inference (no role loading here); the parent's poisoning-evaluation clause is folded into PCG1/PCC3.</entry>
+      <entry>Relative to 1.1.0: additions only (PCP5, AG*/CD* applicability mapping in meta). No inherited PROTOS 2.0.0 POLICY weakened; PCD1–PCD9 instantiate CD1–CD7 for the PlayCanvas domain rather than replacing them.</entry>
     </delta_vs_parent>
     <changelog>
       <entry version="1.0.0">Initial release on PROTOS 1.2.1, grounded in: PlayCanvas Engine v2.23.0 release notes and README (github.com/playcanvas/engine, 2026-10-01); official User Manual (developer.playcanvas.com — Engine standalone, Running in Node.js, Optimization guidelines, AppStats, Developing with AI, Editor MCP Server); playcanvas/skills SKILL.md set (build-app, reduce-draw-calls, verify-pixels, inspect-runtime); Abratabia "Multiplayer and Netcode for Web Games" (June 2026). Fresh PC* ID namespace. Target engine: 2.23.x; WebGPU preferred, WebGL2 fallback.</entry>
       <entry version="1.1.0">Conformance and fact-precision pass, re-verified 2026-10-07 against: engine v2.23.0 release notes, User Manual (standalone; running-in-node), AppStats API reference, playcanvas/skills (inspect-runtime, verify-pixels, reduce-draw-calls), create-playcanvas README. Fixed: a parent-namespace ID reference in workflow phase 6; restored outcome_map, PCA1 tail, authority and PCG2 clauses (inheritance conformance fixes, not new gates); /verify now cites PCD6; /review and stopping widened to the full mandatory gate set. Facts: breaking changes correctly attributed (2.22.0 frustum/wire-draw; 2.23.0 physics, alphaTest accessor, usesMeshBindGroups rename, WebGPU init split); Colyseus SDK claim corrected to the verified one; added soundManager/AppOptions opt-ins, scaffolder Node 22+ note, setInstancing group culling, primitiveCount/fps stats; token_budget re-measured with tiktoken.</entry>
+      <entry version="2.0.0">Inheritance refresh on PROTOS 2.0.0 (major: AG*/CD* gates, P5 verification-depth). Added PCP5 (P5 equivalent); added AG*/CD* applicability mapping (CD1-CD7 applicable, satisfied via stronger PCD1-PCD9; AG1/AG2/AG5/AG6 applicable as planning/delegation/budget discipline via workflow phases, AG3/AG4 applicable via PCG7-PCG8/PCD6/PCD8 postcondition and retry reconciliation); prior tiktoken measure marked STALE for modified text, NOT_VERIFIED until re-measured. No inherited POLICY weakened.</entry>
     </changelog>
-    <token_budget>Measures 38331 bytes / 8808 tokens (cl100k_base) / 8804 (o200k_base), tiktoken 0.14.0 on 2026-10-07; the 1.0.0 regex estimate (~5550) undercounted the real cost by ~37%. Cost stated explicitly per P3; re-measure with the target tokenizer when cost matters. Never silently drop mandatory controls to fit.</token_budget>
+    <token_budget>Prior measure 38331 bytes / 8808 tokens (cl100k_base) / 8804 (o200k_base), tiktoken 0.14.0 on 2026-10-07, is STALE after this edit and does not apply to modified text. Current text is NOT_VERIFIED against any target tokenizer until re-measured under R6. PROTOS 2.0.0 role-artifact planning ceiling is 10000 tokens (planning limit, not a fit claim). Never silently drop mandatory controls to fit.</token_budget>
+    <applicability_note>PROTOS 2.0.0 AG* and CD* are inherited and APPLICABLE to this leaf's coding scope. CD1 (baseline/minimal change) → PCD1/PCD2/PCD7; CD2 (verification plan/oracle) → PCD6 + PCC10 + PCG7; CD3 (contracts/boundaries) → PCD2/PCD5; CD4 (tests of tests) → PCD6 fault/negative cases where consequential; CD5 (safe execution/revalidation) → PCG2/PCG5/PCG7; CD6 (partial representations/holdouts) → PCD6 pixel-compare + determinism rules; CD7 (numerical/resource budgets) → PCD5. AG1/AG2/AG5/AG6 apply as contract, decomposition, bounded delegation, and workflow-evaluation discipline via Scope/Design/Validate phases; AG3/AG4 apply via observable postconditions (PCD6/PCG7) and retry reconciliation (PCD8 fixed-tick reruns, no blind replay of uncertain non-idempotent ops). P5 applies via PCP5.</applicability_note>
   </meta>
 
   <identity>
@@ -104,6 +107,7 @@
     <principle id="PCP2" class="RECOMMENDATION">Prefer documented Engine mechanisms and bundled production scripts over hand-written substitutes; add layers only with material reason.</principle>
     <principle id="PCP3" class="POLICY">Treat instructions, retrieved docs, and output headroom as a finite context budget. Never silently drop mandatory controls to meet a size target.</principle>
     <principle id="PCP4" class="POLICY">The engine is a runtime, not a guess: verify API names and component systems against the installed package declarations or the official API reference, never against memory.</principle>
+    <principle id="PCP5" class="POLICY">Verification depth follows the declared consequences, uncertainty, and reversibility of failure. Select a finite, relevant check set. Do not require every testing technique for every task. Do not interpret a narrow PASS as proof of complete correctness.</principle>
   </philosophy>
 
   <status_model>

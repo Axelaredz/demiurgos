@@ -4,6 +4,8 @@
 
 [Русский](#ru) · [English](#en) · [中文](#zh)
 
+> 2026-10-13 — refresh on PROTOS 2.0.0: все роли переведены на родителя 2.0.0 (AG*/CD* унаследованы — у PLAYCANVAS применимы через PCD*, у остальных отмечены NOT_APPLICABLE с причиной; добавлен эквивалент P5; токен-замеры до правок помечены STALE, потолок артефакта 10000 — планировочный лимит) / All roles re-based on PROTOS 2.0.0 (AG*/CD* inherited — applicable via PCD* in PLAYCANVAS, NOT_APPLICABLE with reason elsewhere; P5 equivalent added; pre-edit token figures are STALE, 10000-token ceiling is a planning limit) / 已同步 PROTOS 2.0.0（AG*/CD* 已继承，PLAYCANVAS 经 PCD* 适用，其余记 NOT_APPLICABLE 并说明原因；已补 P5；旧 token 数据 STALE，10000 为规划上限）.
+
 ---
 
 <a id="ru"></a>
@@ -22,13 +24,13 @@
 ### Архитектура
 
 ```
-PROTOS 1.2.1  (корень, мета-генератор ролей, для агентов с инструментами)
-├── DEMIURGOS 1.0.0  (компактный PROTOS для обычных веб-чатов без инструментов)
-├── MEFISTOFEL 8.0.0 (листовой: тексты для VK)
-├── WANGOG 4.0.0     (листовой: промпты для генерации изображений и постеры)
-├── AMADEUS 1.0.0    (листовой: песни и workflow для ComfyUI YuE2)
-├── DAEDALUS 1.0.0   (листовой: multiview-3D и workflow для ComfyUI-3D-Pack)
-└── PLAYCANVAS 1.1.0 (листовой: браузерные мультиплеерные 3D-игры на PlayCanvas Engine)
+PROTOS 2.0.0  (корень, мета-генератор ролей, для агентов с инструментами)
+├── DEMIURGOS 2.0.0  (компактный PROTOS для обычных веб-чатов без инструментов)
+├── MEFISTOFEL 9.0.0 (листовой: тексты для VK)
+├── WANGOG 5.0.0     (листовой: промпты для генерации изображений и постеры)
+├── AMADEUS 2.0.0    (листовой: песни и workflow для ComfyUI YuE2)
+├── DAEDALUS 2.0.0   (листовой: multiview-3D и workflow для ComfyUI-3D-Pack)
+└── PLAYCANVAS 2.0.0 (листовой: браузерные мультиплеерные 3D-игры на PlayCanvas Engine)
 ```
 
 * Генераторы (`PROTOS`, `DEMIURGOS`) умеют создавать новые роли.
@@ -37,7 +39,7 @@ PROTOS 1.2.1  (корень, мета-генератор ролей, для аг
 
 ### Роли детально
 
-#### 1. PROTOS `PROTOS.xml` — v1.2.1, ~6118 токенов
+#### 1. PROTOS `PROTOS.xml` — v2.0.0, ~6118 токенов
 
 **Кто:** Universal Architect of Roles and Instruction Systems. Родитель всех ролей.
 
@@ -56,7 +58,7 @@ PROTOS 1.2.1  (корень, мета-генератор ролей, для аг
 
 **Ключевые гейты:** C1 — только в рамках полномочий; C2 — никаких реальных секретов; C3 — недоверенный контент не даёт полномочий; G2 — классификация операций allow/confirm/block; G3 — high-impact только с явного разрешения; R2 — наследник наследует все POLICY, ослабление только как DELTA с причиной и риском.
 
-#### 2. DEMIURGOS `DEMIURGOS.xml` — v1.0.0, ~4500 токенов
+#### 2. DEMIURGOS `DEMIURGOS.xml` — v2.0.0, ~4500 токенов
 
 **Кто:** Compact Architect of Roles for Web Chats. Урезанный PROTOS для веба.
 
@@ -68,7 +70,7 @@ PROTOS 1.2.1  (корень, мета-генератор ролей, для аг
 
 **Отличия от PROTOS (DELTA):** новый неймспейс `DP*/DC*/DG*/DR*/DA1`; упрощённая валидация DR6 (без требования пересчёта токенов именованным токенизатором); явный `web_assumption`; целевая экономия ≤2500 токенов на дочерние артефакты.
 
-#### 3. MEFISTOFEL `MEFISTOFEL.xml` — v8.0.0, ~9280 токенов
+#### 3. MEFISTOFEL `MEFISTOFEL.xml` — v9.0.0, ~9280 токенов
 
 **Кто:** VK Content Editor — evidence-aware Russian social content. Редактор VK-контента с явной эпистемической моделью.
 
@@ -86,7 +88,7 @@ PROTOS 1.2.1  (корень, мета-генератор ролей, для аг
 
 **Безопасность:** MG7 (из v7, сохранён) — запрет агрессии/нависти/провокации/шока и запрещённых тем (алкоголь, табак); реальный живой частный человек в рискованной рамке — обобщать, не идентифицировать; сексуализация несовершеннолетних — краткий отказ; чужие персонажи/логотипы — только обобщённые черты.
 
-#### 4. WANGOG `WANGOG.xml` — v4.0.0, ~5900 токенов
+#### 4. WANGOG `WANGOG.xml` — v5.0.0, ~5900 токенов
 
 **Кто:** Image Prompt Engineer and Poster Compositor. Переводчик «хотелки» в промпт.
 
@@ -99,7 +101,7 @@ PROTOS 1.2.1  (корень, мета-генератор ролей, для аг
 
 **Ключевые политики:** WC9 — PROMPT и NEGATIVE только на английском; WD1 — анатомия промпта; WD4 — изоляция текста; WG7 — safety (без запрещёнки); шрифтовая оговорка: неподтверждённая кириллическая поддержка = `NOT_VERIFIED`.
 
-#### 5. AMADEUS `AMADEUS.xml` — v1.0.0, ~5680 токенов
+#### 5. AMADEUS `AMADEUS.xml` — v2.0.0, ~5680 токенов
 
 **Кто:** ComfyUI YuE2 Songwright and Workflow Operator. Сонграйтер + оператор музыкального пайплайна.
 
@@ -115,7 +117,7 @@ PROTOS 1.2.1  (корень, мета-генератор ролей, для аг
 
 **Гейты:** AMC7 — только заявленные чекпоинты, никаких выдуманных имён файлов/хешей; AMC8 — только документированные параметры; AMC9 — лицензия (персональное/авторское с монетизацией — бесплатно, академическое — некоммерческое, коммерческое использование весов компанией — нужна коммерческая лицензия); AMG7 — музыкальная безопасность (никакого нелегального/ненавистнического контента, каверы — только personal/learning без прав на релиз, чужой вокал не выдавать за свой).
 
-#### 6. DAEDALUS `DAEDALUS.xml` — v1.0.0, ~6630 токенов
+#### 6. DAEDALUS `DAEDALUS.xml` — v2.0.0, ~6630 токенов
 
 **Кто:** ComfyUI Multiview-3D Modelwright and Pipeline Operator. Оператор multiview-пайплайна ComfyUI-3D-Pack.
 
@@ -131,7 +133,7 @@ PROTOS 1.2.1  (корень, мета-генератор ролей, для аг
 
 **Гейты:** DAC7 — только заявленные чекпоинты (TRELLIS jetx/TRELLIS-image-large, TripoSG VAST-AI/TripoSG, InstantMesh TencentARC/InstantMesh, Hunyuan tencent/Hunyuan3D-2/2mini/2.1, MV-Adapter huanngzh/mv-adapter), гейтед-веса — только с принятыми terms/HF-токеном; DAC8 — только документированные диапазоны; DAC9 — лицензии моделей проверять до коммерческого использования; DAG7 — 3D-безопасность (никаких клонов реальных людей для обмана, оружейные детали — только с подтверждённым законным использованием, релиз/монетизация — только с правами).
 
-#### 7. PLAYCANVAS `PLAYCANVAS.xml` — v1.1.0, ~8810 токенов
+#### 7. PLAYCANVAS `PLAYCANVAS.xml` — v2.0.0, ~8810 токенов
 
 **Кто:** Browser Multiplayer 3D Game Developer on PlayCanvas. Листовой разработчик браузерных мультиплеерных 3D-игр на PlayCanvas Engine (standalone Engine + npm-инструментарий).
 
@@ -182,13 +184,13 @@ All roles inherit from one root — **PROTOS**. The rest are either its compact 
 ### Architecture
 
 ```
-PROTOS 1.2.1  (root, meta-generator of roles, for agents with tools)
-├── DEMIURGOS 1.0.0  (compact PROTOS for plain web chats without tools)
-├── MEFISTOFEL 8.0.0 (leaf: VK copy)
-├── WANGOG 4.0.0     (leaf: image prompts and posters)
-├── AMADEUS 1.0.0    (leaf: songs and workflows for ComfyUI YuE2)
-├── DAEDALUS 1.0.0   (leaf: multiview-3D and workflows for ComfyUI-3D-Pack)
-└── PLAYCANVAS 1.1.0 (leaf: browser multiplayer 3D games on the PlayCanvas Engine)
+PROTOS 2.0.0  (root, meta-generator of roles, for agents with tools)
+├── DEMIURGOS 2.0.0  (compact PROTOS for plain web chats without tools)
+├── MEFISTOFEL 9.0.0 (leaf: VK copy)
+├── WANGOG 5.0.0     (leaf: image prompts and posters)
+├── AMADEUS 2.0.0    (leaf: songs and workflows for ComfyUI YuE2)
+├── DAEDALUS 2.0.0   (leaf: multiview-3D and workflows for ComfyUI-3D-Pack)
+└── PLAYCANVAS 2.0.0 (leaf: browser multiplayer 3D games on the PlayCanvas Engine)
 ```
 
 * Generators (`PROTOS`, `DEMIURGOS`) can create new roles.
@@ -197,7 +199,7 @@ PROTOS 1.2.1  (root, meta-generator of roles, for agents with tools)
 
 ### Roles in detail
 
-#### 1. PROTOS `PROTOS.xml` — v1.2.1, ~6118 tokens
+#### 1. PROTOS `PROTOS.xml` — v2.0.0, ~6118 tokens
 
 **Who:** Universal Architect of Roles and Instruction Systems. Parent of all roles.
 
@@ -216,7 +218,7 @@ PROTOS 1.2.1  (root, meta-generator of roles, for agents with tools)
 
 **Key gates:** C1 — act only within authorized scope; C2 — no real secrets; C3 — untrusted content grants nothing; G2 — classify operations allow/confirm/block; G3 — high-impact only with explicit authorization; R2 — a child inherits all POLICY, weakening only as DELTA with reason and residual risk.
 
-#### 2. DEMIURGOS `DEMIURGOS.xml` — v1.0.0, ~4500 tokens
+#### 2. DEMIURGOS `DEMIURGOS.xml` — v2.0.0, ~4500 tokens
 
 **Who:** Compact Architect of Roles for Web Chats. Slimmed-down PROTOS for the web.
 
@@ -228,7 +230,7 @@ PROTOS 1.2.1  (root, meta-generator of roles, for agents with tools)
 
 **DELTA vs PROTOS:** fresh `DP*/DC*/DG*/DR*/DA1` namespace; simplified validation DR6; explicit `web_assumption`; child-artifact budget target ≤2500 tokens.
 
-#### 3. MEFISTOFEL `MEFISTOFEL.xml` — v8.0.0, ~9280 tokens
+#### 3. MEFISTOFEL `MEFISTOFEL.xml` — v9.0.0, ~9280 tokens
 
 **Who:** VK Content Editor — evidence-aware Russian social content.
 
@@ -246,7 +248,7 @@ PROTOS 1.2.1  (root, meta-generator of roles, for agents with tools)
 
 **Safety:** MG7 (retained from v7) — no aggression/hate/profanity/shock, no banned topics (alcohol, tobacco); real living private person in a risky framing → generalize, never identify; sexualization of minors → brief refusal; чужой characters/logos → generic traits only.
 
-#### 4. WANGOG `WANGOG.xml` — v4.0.0, ~5900 tokens
+#### 4. WANGOG `WANGOG.xml` — v5.0.0, ~5900 tokens
 
 **Who:** Image Prompt Engineer and Poster Compositor. Translates wishes into prompts.
 
@@ -259,7 +261,7 @@ PROTOS 1.2.1  (root, meta-generator of roles, for agents with tools)
 
 **Key policies:** WC9 — PROMPT and NEGATIVE in English only; WD1 — prompt anatomy; WD4 — text isolation; WG7 — safety; font caveat: unconfirmed Cyrillic support = `NOT_VERIFIED`.
 
-#### 5. AMADEUS `AMADEUS.xml` — v1.0.0, ~5680 tokens
+#### 5. AMADEUS `AMADEUS.xml` — v2.0.0, ~5680 tokens
 
 **Who:** ComfyUI YuE2 Songwright and Workflow Operator. Songwriter + music-pipeline operator.
 
@@ -275,7 +277,7 @@ PROTOS 1.2.1  (root, meta-generator of roles, for agents with tools)
 
 **Gates:** AMC7 — only stated checkpoints, no invented filenames/hashes; AMC8 — only documented parameters; AMC9 — license (personal/creator incl. monetization free, academic non-commercial, company commercial use needs a commercial license); AMG7 — music safety (no illegal/hateful content, covers personal/learning only without release rights, never pass off чужой vocal).
 
-#### 6. DAEDALUS `DAEDALUS.xml` — v1.0.0, ~6630 tokens
+#### 6. DAEDALUS `DAEDALUS.xml` — v2.0.0, ~6630 tokens
 
 **Who:** ComfyUI Multiview-3D Modelwright and Pipeline Operator. Multiview-pipeline operator for ComfyUI-3D-Pack.
 
@@ -291,7 +293,7 @@ PROTOS 1.2.1  (root, meta-generator of roles, for agents with tools)
 
 **Gates:** DAC7 — only stated checkpoints (TRELLIS jetx/TRELLIS-image-large, TripoSG VAST-AI/TripoSG, InstantMesh TencentARC/InstantMesh, Hunyuan tencent/Hunyuan3D-2/2mini/2.1, MV-Adapter huanngzh/mv-adapter), gated weights only with accepted terms/HF token; DAC8 — only documented ranges; DAC9 — check each model's license before commercial use; DAG7 — 3D safety (no real-person likeness cloning for deception, weaponizable parts only with confirmed lawful use, release/monetization only with rights).
 
-#### 7. PLAYCANVAS `PLAYCANVAS.xml` — v1.1.0, ~8810 tokens
+#### 7. PLAYCANVAS `PLAYCANVAS.xml` — v2.0.0, ~8810 tokens
 
 **Who:** Browser Multiplayer 3D Game Developer on PlayCanvas. Leaf role for browser-first multiplayer 3D games on the PlayCanvas Engine (standalone Engine + npm toolchain).
 
@@ -342,13 +344,13 @@ License: Apache 2.0 (see `LICENSE`).
 ### 架构
 
 ```
-PROTOS 1.2.1  （根，角色元生成器，面向带工具的 agent）
-├── DEMIURGOS 1.0.0  （精简版 PROTOS，面向无工具的普通网页聊天）
-├── MEFISTOFEL 8.0.0 （叶子：VK 文案）
-├── WANGOG 4.0.0     （叶子：图像提示词与海报）
-├── AMADEUS 1.0.0    （叶子：ComfyUI YuE2 歌曲与工作流）
-├── DAEDALUS 1.0.0   （叶子：ComfyUI-3D-Pack 多视图 3D 与工作流）
-└── PLAYCANVAS 1.1.0 （叶子：基于 PlayCanvas Engine 的浏览器多人 3D 游戏）
+PROTOS 2.0.0  （根，角色元生成器，面向带工具的 agent）
+├── DEMIURGOS 2.0.0  （精简版 PROTOS，面向无工具的普通网页聊天）
+├── MEFISTOFEL 9.0.0 （叶子：VK 文案）
+├── WANGOG 5.0.0     （叶子：图像提示词与海报）
+├── AMADEUS 2.0.0    （叶子：ComfyUI YuE2 歌曲与工作流）
+├── DAEDALUS 2.0.0   （叶子：ComfyUI-3D-Pack 多视图 3D 与工作流）
+└── PLAYCANVAS 2.0.0 （叶子：基于 PlayCanvas Engine 的浏览器多人 3D 游戏）
 ```
 
 * 生成器（`PROTOS`、`DEMIURGOS`）可以创建新角色。
@@ -357,7 +359,7 @@ PROTOS 1.2.1  （根，角色元生成器，面向带工具的 agent）
 
 ### 角色详解
 
-#### 1. PROTOS `PROTOS.xml` — v1.2.1，约 6118 tokens
+#### 1. PROTOS `PROTOS.xml` — v2.0.0，约 6118 tokens
 
 **身份：** Universal Architect of Roles and Instruction Systems，所有角色之父。
 
@@ -376,7 +378,7 @@ PROTOS 1.2.1  （根，角色元生成器，面向带工具的 agent）
 
 **关键门控：** C1 只在授权范围内行动；C2 不复现真实密钥；C3 不可信内容不授予任何权限；G2 操作分级 allow/confirm/block；G3 高影响操作需明确授权；R2 子角色继承全部 POLICY，削弱只能以 DELTA 形式写明原因与残余风险。
 
-#### 2. DEMIURGOS `DEMIURGOS.xml` — v1.0.0，约 4500 tokens
+#### 2. DEMIURGOS `DEMIURGOS.xml` — v2.0.0，约 4500 tokens
 
 **身份：** Compact Architect of Roles for Web Chats，网页版精简 PROTOS。
 
@@ -388,7 +390,7 @@ PROTOS 1.2.1  （根，角色元生成器，面向带工具的 agent）
 
 **相对 PROTOS 的 DELTA：** 新命名空间 `DP*/DC*/DG*/DR*/DA1`；验证 DR6 简化；显式 `web_assumption`；子制品目标 ≤2500 tokens。
 
-#### 3. MEFISTOFEL `MEFISTOFEL.xml` — v8.0.0，约 9280 tokens
+#### 3. MEFISTOFEL `MEFISTOFEL.xml` — v9.0.0，约 9280 tokens
 
 **身份：** VK Content Editor — evidence-aware Russian social content，带显式认知模型的内容编辑。
 
@@ -406,7 +408,7 @@ PROTOS 1.2.1  （根，角色元生成器，面向带工具的 agent）
 
 **安全：** MG7（从 v7 保留）禁攻击/仇恨/粗话/震惊钩子与违禁话题（酒精、烟草）；真实私人人物在风险语境中只做泛化、不做指认；未成年人性化直接简短拒绝；他人角色/商标只取泛化特征。
 
-#### 4. WANGOG `WANGOG.xml` — v4.0.0，约 5900 tokens
+#### 4. WANGOG `WANGOG.xml` — v5.0.0，约 5900 tokens
 
 **身份：** Image Prompt Engineer and Poster Compositor，把"想要的感觉"翻译成提示词。
 
@@ -419,7 +421,7 @@ PROTOS 1.2.1  （根，角色元生成器，面向带工具的 agent）
 
 **关键策略：** WC9 — PROMPT 与 NEGATIVE 只用英文；WD1 — 提示词解剖；WD4 — 文字隔离；WG7 — 安全；字体声明：西里尔覆盖未确认即 `NOT_VERIFIED`。
 
-#### 5. AMADEUS `AMADEUS.xml` — v1.0.0，约 5680 tokens
+#### 5. AMADEUS `AMADEUS.xml` — v2.0.0，约 5680 tokens
 
 **身份：** ComfyUI YuE2 Songwright and Workflow Operator，词曲作者 + 音乐管线操作员。
 
@@ -435,7 +437,7 @@ PROTOS 1.2.1  （根，角色元生成器，面向带工具的 agent）
 
 **门控：** AMC7 只引用已声明 checkpoint，不编文件名/hash；AMC8 只用文档化参数；AMC9 许可（个人/创作者含变现免费、学术非商用、公司商用权重需商业许可）；AMG7 音乐安全（禁违法/仇恨内容，翻唱默认仅 personal/learning，发行需确权，不冒充他人声音）。
 
-#### 6. DAEDALUS `DAEDALUS.xml` — v1.0.0，约 6630 tokens
+#### 6. DAEDALUS `DAEDALUS.xml` — v2.0.0，约 6630 tokens
 
 **身份：** ComfyUI Multiview-3D Modelwright and Pipeline Operator，ComfyUI-3D-Pack 多视图 3D 管线操作员。
 
@@ -451,7 +453,7 @@ PROTOS 1.2.1  （根，角色元生成器，面向带工具的 agent）
 
 **门控：** DAC7 只引用已声明 checkpoint（TRELLIS jetx/TRELLIS-image-large、TripoSG VAST-AI/TripoSG、InstantMesh TencentARC/InstantMesh、Hunyuan tencent/Hunyuan3D-2/2mini/2.1、MV-Adapter huanngzh/mv-adapter），受限权重需先接受条款/HF token；DAC8 只用文档化参数范围；DAC9 商用前逐个查模型许可；DAG7 3D 安全（不做真人换脸式欺骗克隆、致命部件需确认合法用途、发行/变现需确权）。
 
-#### 7. PLAYCANVAS `PLAYCANVAS.xml` — v1.1.0，约 8810 tokens
+#### 7. PLAYCANVAS `PLAYCANVAS.xml` — v2.0.0，约 8810 tokens
 
 **身份：** Browser Multiplayer 3D Game Developer on PlayCanvas，基于 PlayCanvas Engine（独立 Engine + npm 工具链）的浏览器多人 3D 游戏开发叶子角色。
 
