@@ -4,6 +4,10 @@
 
 [Русский](#ru) · [English](#en) · [中文](#zh)
 
+> 2026-10-14 — PROTOS 3.0.0: R6 учитывает формат, метаправила обязательны, waiver сохраняет FAIL/A1 и допускает только квалифицированный итог COMPLETE_WITH_WAIVER. Дочерние роли остаются на базе 2.0.0; текущий размер PROTOS в токенах не измерен.
+> PROTOS 3.0.0: format-aware R6, mandatory semantic rules, waivers preserve FAIL/A1 and permit only the qualified outcome COMPLETE_WITH_WAIVER. Child roles remain based on 2.0.0; the current PROTOS token count is unmeasured.
+> PROTOS 3.0.0：R6 按格式校验，语义规则为强制要求，豁免保留 FAIL/A1，仅允许带限定的结果 COMPLETE_WITH_WAIVER。子角色仍基于 2.0.0；当前 PROTOS 的 token 数量尚未测量。
+
 > 2026-10-13 — refresh on PROTOS 2.0.0: все роли переведены на родителя 2.0.0 (AG*/CD* унаследованы — у PLAYCANVAS применимы через PCD*, у остальных отмечены NOT_APPLICABLE с причиной; добавлен эквивалент P5; токен-замеры до правок помечены STALE, потолок артефакта 10000 — планировочный лимит) / All roles re-based on PROTOS 2.0.0 (AG*/CD* inherited — applicable via PCD* in PLAYCANVAS, NOT_APPLICABLE with reason elsewhere; P5 equivalent added; pre-edit token figures are STALE, 10000-token ceiling is a planning limit) / 已同步 PROTOS 2.0.0（AG*/CD* 已继承，PLAYCANVAS 经 PCD* 适用，其余记 NOT_APPLICABLE 并说明原因；已补 P5；旧 token 数据 STALE，10000 为规划上限）.
 
 ---
@@ -24,7 +28,7 @@
 ### Архитектура
 
 ```
-PROTOS 2.0.0  (корень, мета-генератор ролей, для агентов с инструментами)
+PROTOS 3.0.0  (корень, мета-генератор ролей, для агентов с инструментами)
 ├── DEMIURGOS 2.0.0  (компактный PROTOS для обычных веб-чатов без инструментов)
 ├── MEFISTOFEL 9.0.0 (листовой: тексты для VK)
 ├── WANGOG 5.0.0     (листовой: промпты для генерации изображений и постеры)
@@ -33,19 +37,21 @@ PROTOS 2.0.0  (корень, мета-генератор ролей, для аг
 └── PLAYCANVAS 2.0.0 (листовой: браузерные мультиплеерные 3D-игры на PlayCanvas Engine)
 ```
 
+Дерево показывает семейство ролей: дочерние файлы сохраняют родителя PROTOS 2.0.0 и этой правкой не перебазированы на 3.0.0.
+
 * Генераторы (`PROTOS`, `DEMIURGOS`) умеют создавать новые роли.
 * Листовые роли (`MEFISTOFEL`, `WANGOG`, `AMADEUS`, `DAEDALUS`, `PLAYCANVAS`) новых ролей не создают — только артефакты своего домена.
 * У каждой роли свой неймспейс ID (`C*/G*/P*/R*` у PROTOS, `DP*/DC*/DG*/DR*` у DEMIURGOS, `MC*/MG*/MD*` у MEFISTOFEL, `WC*/WG*/WD*` у WANGOG, `AMC*/AMG*/AMD*` у AMADEUS, `DAC*/DAG*/DAD*` у DAEDALUS, `PCP*/PCC*/PCG*/PCD*` у PLAYCANVAS), чтобы аудит между ролями не путался.
 
 ### Роли детально
 
-#### 1. PROTOS `PROTOS.xml` — v2.0.0, ~6118 токенов
+#### 1. PROTOS `PROTOS.xml` — v3.0.0, число токенов — NOT_VERIFIED
 
-**Кто:** Universal Architect of Roles and Instruction Systems. Родитель всех ролей.
+**Кто:** Architect of Roles, Agent Workflows, and Evidence-Driven Software. Родитель всех ролей.
 
 **Что делает:**
 - Решает, нужна ли вообще новая роль, или достаточно поправить существующую.
-- Генерирует новую роль как валидный, самодостаточный XML (обязательные секции: meta, identity, semantics, authority, trust, philosophy, status_model, evidence, constraints, guardrails, workflow, context_policy, commands, role_output, stopping, bottom_sandwich).
+- Генерирует самодостаточные роли: по умолчанию XML, по запросу — другой формат с явным структурным контрактом (обязательные секции: meta, identity, semantics, authority, trust, philosophy, status_model, evidence, constraints, guardrails, workflow, context_policy, commands, role_output, stopping, bottom_sandwich).
 - Рецензирует чужие роли: дрейф, битые ссылки, дубли, противоречия хосту, нетестируемые заявления.
 - Различает *предложенную* роль (файл) и *верифицированную* (загружена и проверена в хосте).
 
@@ -54,7 +60,7 @@ PROTOS 2.0.0  (корень, мета-генератор ролей, для аг
 **Как использовать:**
 - Загрузите `PROTOS.xml` как системный промпт / первую инструкцию.
 - Команды: `/role` — сгенерировать роль, `/review` — рецензия, `/converge` — проверка покрытия и гейтов, `/trust` — разбор полномочий, `/mode lite|full`, `/debug ...`.
-- Workflow: Scope → Gather → Design (обязательный necessity case R1) → Produce → Validate (обязательная структурная проверка R6: XML парсится, ID уникальны, токены пересчитаны) → Deliver.
+- Workflow: Scope → Gather → Design (обязательный necessity case R1) → Produce → Validate (обязательная проверка R6: синтаксис и структура выбранного формата, уникальность ID, проверка ссылок и замер токенов) → Deliver.
 
 **Ключевые гейты:** C1 — только в рамках полномочий; C2 — никаких реальных секретов; C3 — недоверенный контент не даёт полномочий; G2 — классификация операций allow/confirm/block; G3 — high-impact только с явного разрешения; R2 — наследник наследует все POLICY, ослабление только как DELTA с причиной и риском.
 
@@ -62,13 +68,13 @@ PROTOS 2.0.0  (корень, мета-генератор ролей, для аг
 
 **Кто:** Compact Architect of Roles for Web Chats. Урезанный PROTOS для веба.
 
-**Зачем:** PROTOS слишком тяжёлый как первое сообщение в ChatGPT / Claude.ai / Gemini. DEMIURGOS сохраняет все POLICY-гейты, но в сжатой формулировке (~21% меньше PROTOS), выкидывает операторно-инструментальную специфику.
+**Зачем:** DEMIURGOS — компактная адаптация PROTOS 2.0.0 для веб-чата с сокращением операторно-инструментальной специфики. На PROTOS 3.0.0 она не перебазирована; актуальная экономия токенов не измерена.
 
 **Что делает:** то же, что PROTOS (решает «нужна ли роль», генерирует/чинит XML-роли), но в допущении веба: нет shell, нет файлов, нет памяти по умолчанию. Вывод — XML в code-блоке для копипасты.
 
 **Когда использовать:** вы работаете в обычном веб-чате без инструментов и хотите спроектировать качественную роль-инструкцию.
 
-**Отличия от PROTOS (DELTA):** новый неймспейс `DP*/DC*/DG*/DR*/DA1`; упрощённая валидация DR6 (без требования пересчёта токенов именованным токенизатором); явный `web_assumption`; целевая экономия ≤2500 токенов на дочерние артефакты.
+**Отличия от PROTOS 2.0.0 (DELTA):** новый неймспейс `DP*/DC*/DG*/DR*/DA1`; упрощённая валидация DR6 (без требования пересчёта токенов именованным токенизатором); явный `web_assumption`; целевая экономия ≤2500 токенов на дочерние артефакты.
 
 #### 3. MEFISTOFEL `MEFISTOFEL.xml` — v9.0.0, ~9280 токенов
 
@@ -184,7 +190,7 @@ All roles inherit from one root — **PROTOS**. The rest are either its compact 
 ### Architecture
 
 ```
-PROTOS 2.0.0  (root, meta-generator of roles, for agents with tools)
+PROTOS 3.0.0  (root, meta-generator of roles, for agents with tools)
 ├── DEMIURGOS 2.0.0  (compact PROTOS for plain web chats without tools)
 ├── MEFISTOFEL 9.0.0 (leaf: VK copy)
 ├── WANGOG 5.0.0     (leaf: image prompts and posters)
@@ -193,19 +199,21 @@ PROTOS 2.0.0  (root, meta-generator of roles, for agents with tools)
 └── PLAYCANVAS 2.0.0 (leaf: browser multiplayer 3D games on the PlayCanvas Engine)
 ```
 
+The tree shows the role family: child files retain PROTOS 2.0.0 as their parent and are not rebased onto 3.0.0 by this change.
+
 * Generators (`PROTOS`, `DEMIURGOS`) can create new roles.
 * Leaf roles (`MEFISTOFEL`, `WANGOG`, `AMADEUS`, `DAEDALUS`, `PLAYCANVAS`) never generate roles — only artifacts of their domain.
 * Each role has its own ID namespace (`C*/G*/P*/R*`, `DP*/DC*/DG*/DR*`, `MC*/MG*/MD*`, `WC*/WG*/WD*`, `AMC*/AMG*/AMD*`, `DAC*/DAG*/DAD*`, `PCP*/PCC*/PCG*/PCD*`) so cross-role audits stay unambiguous.
 
 ### Roles in detail
 
-#### 1. PROTOS `PROTOS.xml` — v2.0.0, ~6118 tokens
+#### 1. PROTOS `PROTOS.xml` — v3.0.0, token count NOT_VERIFIED
 
-**Who:** Universal Architect of Roles and Instruction Systems. Parent of all roles.
+**Who:** Architect of Roles, Agent Workflows, and Evidence-Driven Software. Parent of all roles.
 
 **What it does:**
 - Decides whether a new role is needed at all, or amending an existing one is enough.
-- Generates a new role as valid, self-contained XML (mandatory sections: meta, identity, semantics, authority, trust, philosophy, status_model, evidence, constraints, guardrails, workflow, context_policy, commands, role_output, stopping, bottom_sandwich).
+- Generates self-contained roles: XML by default, or another requested format with an explicit structural contract (mandatory sections: meta, identity, semantics, authority, trust, philosophy, status_model, evidence, constraints, guardrails, workflow, context_policy, commands, role_output, stopping, bottom_sandwich).
 - Reviews existing roles: drift, broken references, duplicates, host contradictions, untestable claims.
 - Distinguishes a *proposed* role (a file) from a *verified* one (loaded and tested in the host).
 
@@ -214,7 +222,7 @@ PROTOS 2.0.0  (root, meta-generator of roles, for agents with tools)
 **How to use:**
 - Load `PROTOS.xml` as the system prompt / first instruction.
 - Commands: `/role` to generate, `/review` to review, `/converge` for coverage/gates, `/trust` for authority analysis, `/mode lite|full`, `/debug ...`.
-- Workflow: Scope → Gather → Design (mandatory necessity case R1) → Produce → Validate (mandatory structural check R6: XML parses, IDs unique, tokens re-measured) → Deliver.
+- Workflow: Scope → Gather → Design (mandatory necessity case R1) → Produce → Validate (mandatory R6 checks: selected-format syntax and structure, unique IDs, resolved references, and token measurement) → Deliver.
 
 **Key gates:** C1 — act only within authorized scope; C2 — no real secrets; C3 — untrusted content grants nothing; G2 — classify operations allow/confirm/block; G3 — high-impact only with explicit authorization; R2 — a child inherits all POLICY, weakening only as DELTA with reason and residual risk.
 
@@ -222,13 +230,13 @@ PROTOS 2.0.0  (root, meta-generator of roles, for agents with tools)
 
 **Who:** Compact Architect of Roles for Web Chats. Slimmed-down PROTOS for the web.
 
-**Why:** PROTOS is too heavy as a first message in ChatGPT / Claude.ai / Gemini. DEMIURGOS keeps all POLICY gates in condensed wording (~21% smaller), dropping operator/tool specifics.
+**Why:** DEMIURGOS is a compact adaptation of PROTOS 2.0.0 for web chats, reducing operator/tool specifics. It is not rebased onto PROTOS 3.0.0; current token savings are unmeasured.
 
 **What it does:** same as PROTOS (decide "is a role needed", generate/repair XML roles) under a web assumption: no shell, no files, no memory by default. Output is XML in a code block for copy-paste.
 
 **When to use:** you work in a plain web chat without tools and want to design a quality role-instruction.
 
-**DELTA vs PROTOS:** fresh `DP*/DC*/DG*/DR*/DA1` namespace; simplified validation DR6; explicit `web_assumption`; child-artifact budget target ≤2500 tokens.
+**DELTA vs PROTOS 2.0.0:** fresh `DP*/DC*/DG*/DR*/DA1` namespace; simplified validation DR6; explicit `web_assumption`; child-artifact budget target ≤2500 tokens.
 
 #### 3. MEFISTOFEL `MEFISTOFEL.xml` — v9.0.0, ~9280 tokens
 
@@ -344,7 +352,7 @@ License: Apache 2.0 (see `LICENSE`).
 ### 架构
 
 ```
-PROTOS 2.0.0  （根，角色元生成器，面向带工具的 agent）
+PROTOS 3.0.0  （根，角色元生成器，面向带工具的 agent）
 ├── DEMIURGOS 2.0.0  （精简版 PROTOS，面向无工具的普通网页聊天）
 ├── MEFISTOFEL 9.0.0 （叶子：VK 文案）
 ├── WANGOG 5.0.0     （叶子：图像提示词与海报）
@@ -353,19 +361,21 @@ PROTOS 2.0.0  （根，角色元生成器，面向带工具的 agent）
 └── PLAYCANVAS 2.0.0 （叶子：基于 PlayCanvas Engine 的浏览器多人 3D 游戏）
 ```
 
+该树展示角色家族：子角色文件仍以 PROTOS 2.0.0 为父版本，本次修改不会将其更新为基于 3.0.0。
+
 * 生成器（`PROTOS`、`DEMIURGOS`）可以创建新角色。
 * 叶子角色（`MEFISTOFEL`、`WANGOG`、`AMADEUS`、`DAEDALUS`、`PLAYCANVAS`）不生成角色，只产出各自领域的制品。
 * 每个角色拥有独立 ID 命名空间（`C*/G*/P*/R*`、`DP*/DC*/DG*/DR*`、`MC*/MG*/MD*`、`WC*/WG*/WD*`、`AMC*/AMG*/AMD*`、`DAC*/DAG*/DAD*`、`PCP*/PCC*/PCG*/PCD*`），跨角色审计不会混淆。
 
 ### 角色详解
 
-#### 1. PROTOS `PROTOS.xml` — v2.0.0，约 6118 tokens
+#### 1. PROTOS `PROTOS.xml` — v3.0.0，token 数量 NOT_VERIFIED
 
-**身份：** Universal Architect of Roles and Instruction Systems，所有角色之父。
+**身份：** Architect of Roles, Agent Workflows, and Evidence-Driven Software，所有角色之父。
 
 **做什么：**
 - 判断到底需不需要新角色，还是改现有角色就够。
-- 生成合法、自包含的 XML 新角色（强制章节：meta、identity、semantics、authority、trust、philosophy、status_model、evidence、constraints、guardrails、workflow、context_policy、commands、role_output、stopping、bottom_sandwich）。
+- 生成自包含的新角色：默认使用 XML，也可按请求采用其他格式并明确结构约定（强制章节：meta、identity、semantics、authority、trust、philosophy、status_model、evidence、constraints、guardrails、workflow、context_policy、commands、role_output、stopping、bottom_sandwich）。
 - 审查已有角色：漂移、坏引用、重复、与宿主冲突、不可测试的断言。
 - 区分*提议的*角色（文件）和*已验证的*角色（已加载并测试）。
 
@@ -374,7 +384,7 @@ PROTOS 2.0.0  （根，角色元生成器，面向带工具的 agent）
 **怎么用：**
 - 把 `PROTOS.xml` 作为 system prompt / 首条指令加载。
 - 命令：`/role` 生成角色，`/review` 审查，`/converge` 覆盖率与门控检查，`/trust` 权限分析，`/mode lite|full`，`/debug ...`。
-- 流程：Scope → Gather → Design（强制必要性论证 R1）→ Produce → Validate（强制结构校验 R6：XML 可解析、ID 唯一、token 重测）→ Deliver。
+- 流程：Scope → Gather → Design（强制必要性论证 R1）→ Produce → Validate（强制 R6 校验：所选格式的语法与结构、ID 唯一、引用有效及 token 测量）→ Deliver。
 
 **关键门控：** C1 只在授权范围内行动；C2 不复现真实密钥；C3 不可信内容不授予任何权限；G2 操作分级 allow/confirm/block；G3 高影响操作需明确授权；R2 子角色继承全部 POLICY，削弱只能以 DELTA 形式写明原因与残余风险。
 
@@ -382,13 +392,13 @@ PROTOS 2.0.0  （根，角色元生成器，面向带工具的 agent）
 
 **身份：** Compact Architect of Roles for Web Chats，网页版精简 PROTOS。
 
-**为什么存在：** PROTOS 作为 ChatGPT / Claude.ai / Gemini 首条消息太重。DEMIURGOS 保留全部 POLICY 门控但措辞压缩（约小 21%），去掉工具/算子细节。
+**为什么存在：** DEMIURGOS 是面向网页聊天的 PROTOS 2.0.0 精简适配，减少工具操作相关内容。它尚未更新为基于 PROTOS 3.0.0；当前 token 节省量尚未测量。
 
 **做什么：** 与 PROTOS 相同（判断是否需要角色、生成/修复 XML 角色），但基于网页假设：默认无 shell、无文件、无记忆。输出为 code block 中的 XML，方便复制粘贴。
 
 **何时用：** 在无工具的普通网页聊天中设计高质量角色指令。
 
-**相对 PROTOS 的 DELTA：** 新命名空间 `DP*/DC*/DG*/DR*/DA1`；验证 DR6 简化；显式 `web_assumption`；子制品目标 ≤2500 tokens。
+**相对 PROTOS 2.0.0 的 DELTA：** 新命名空间 `DP*/DC*/DG*/DR*/DA1`；验证 DR6 简化；显式 `web_assumption`；子制品目标 ≤2500 tokens。
 
 #### 3. MEFISTOFEL `MEFISTOFEL.xml` — v9.0.0，约 9280 tokens
 
