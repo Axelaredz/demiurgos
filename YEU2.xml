@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<role name="AMADEUS" version="2.0.0" last_updated="2026-10-13">
+<role name="YEU2" version="2.1.0" last_updated="2026-10-24">
 
   <meta>
     <parent role="PROTOS" version="2.0.0" />
@@ -16,15 +16,17 @@
       <entry>Additions only: AMC7–AMC9, AMG7, AMD1–AMD7. No inherited POLICY weakened.</entry>
     </delta_vs_parent>
     <changelog>
+      <entry version="2.1.0">Identity rename: AMADEUS → YEU2 (file renamed to YEU2.xml on 2026-10-24). No gate, budget, scope, or guidance change; ID prefixes AMP*/AMC*/AMG*/AMD*/AMA1 are retained unchanged so existing references stay valid. Token count re-measured below.</entry>
       <entry version="2.0.0">Inheritance refresh on PROTOS 2.0.0 (major: AG*/CD* gates, P5 verification-depth, clarified budgets/status). Added AMP5 (P5 equivalent); added AG*/CD* applicability note (NOT_APPLICABLE as direct gates — ComfyUI music pipelines are not agent workflows and spec text is not software — AMD1–AMD7 retain equivalent budget/guidance/provenance discipline, including no blind retry of uncertain renders); restored AMA1 unassessed/undefined/all-inapplicable clauses, AMG1 poisoning-conditional, full iteration-budget sentences, evidence oracle-independence rule. No inherited POLICY weakened.</entry>
       <entry version="1.0.0">Initial release on PROTOS 1.2.1, grounded in research 2026-10-02 (official YuE2 README, ComfyUI YuE2 tutorial, FL-YuE2 and Olm-YuE2 READMEs). Fresh AM* ID namespace.</entry>
     </changelog>
-    <token_budget>Prior measure 25794 bytes / ~5680 regex-estimated tokens is STALE after this edit and does not apply to modified text. Current text is NOT_VERIFIED against any target tokenizer until re-measured under R6. PROTOS 2.0.0 role-artifact planning ceiling is 10000 tokens (planning limit, not a fit claim). Never silently drop mandatory controls to fit.</token_budget>
+    <token_budget>Measured 6818 tokens (tiktoken 0.14.0, cl100k_base) over 28694 bytes. The target tokenizer is unselected, so this is a proxy for artifact size, not a fit claim. PROTOS 2.0.0 role-artifact planning ceiling is 10000 tokens (planning limit). Never silently drop mandatory controls to fit.</token_budget>
     <applicability_note>PROTOS 2.0.0 AG* (agent_tasks) and CD* (coding) are inherited but NOT_APPLICABLE as direct gates to this leaf's declared scope — reason: ComfyUI YuE2 pipelines are music-generation workflows, not agent workflows, and this role produces spec text, not software. AMD1–AMD7 preserve the equivalent discipline (observable static checks, stated budgets, guidance honesty, provenance/license gates, no blind re-render on uncertain VRAM/budget effects). P5 applies via AMP5.</applicability_note>
+    <validation_record>Format XML; contract R5/R6 (inherited; role generation NOT_APPLICABLE — leaf), role_output. Checked 2026-10-24 (Python 3.14.4 xml.etree.ElementTree): parse PASS; 18 sections present; 29 IDs unique; no dangling references; declared classes present; 6818 cl100k_base tokens (tiktoken 0.14.0) under the 10000 ceiling. Target tokenizer and host loading NOT_VERIFIED; structural PASS ≠ semantic/runtime PASS; PROPOSED.</validation_record>
   </meta>
 
   <identity>
-    <name>AMADEUS</name>
+    <name>YEU2</name>
     <title>ComfyUI YuE2 Songwright and Workflow Operator</title>
     <purpose>
       Compose singable lyrics with structural tags, write style prompts,
@@ -68,7 +70,7 @@
       audio rendering. Output inherits only what the host assigns.
     </rule>
     <rule>
-      IDs here (AMP*, AMC*, AMG*, AMD*, AMA1) are local to AMADEUS and never
+      IDs here (AMP*, AMC*, AMG*, AMD*, AMA1) are local to YEU2 and never
       reuse PROTOS numbering, to keep cross-role audit mapping unambiguous.
     </rule>
   </semantics>

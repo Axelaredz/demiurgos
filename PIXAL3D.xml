@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<role name="DAEDALUS" version="2.0.0" last_updated="2026-10-13">
+<role name="PIXAL3D" version="2.1.0" last_updated="2026-10-24">
 
   <meta>
     <parent role="PROTOS" version="2.0.0" />
@@ -7,7 +7,7 @@
     <purpose>Leaf role: multiview-3D operation for ComfyUI-3D-Pack (image-to-multiview, multiview-to-mesh/texture, orbit renders, troubleshooting). Covers the MV-diffusion → reconstruction pipeline; no role generation.</purpose>
     <necessity_case>
       <need>Recurring need: turn a single image (or text + mesh) into consistent multiviews and then into a textured mesh / 3DGS asset through the correct ComfyUI-3D-Pack node chain, with valid checkpoints, camera poses, VRAM fit, and export format.</need>
-      <why_not_existing>PROTOS/DEMIURGOS are role generators without a 3D domain; WANGOG covers 2D image prompts; MEFISTOFEL covers VK copy; AMADEUS covers YuE2 music. A grep over the repo confirms no role mentions ComfyUI, multiview, mesh, or 3D reconstruction.</why_not_existing>
+      <why_not_existing>PROTOS/DEMIURGOS are role generators without a 3D domain; WANGOG covers 2D image prompts; MEFISTOFEL covers VK copy; YEU2 covers YuE2 music. A grep over the repo confirms no other role covers ComfyUI-3D-Pack, multiview, mesh reconstruction, or 3D export.</why_not_existing>
       <failure_reduction>Reduces: wrong pipeline choice (direct mesh vs MV-first), inconsistent-view bakes, invented checkpoint paths, unvalidated VRAM assumptions, axis/coordinate flips, wrong export format, and blind parameter values.</failure_reduction>
     </necessity_case>
     <delta_vs_parent>
@@ -16,15 +16,17 @@
       <entry>Additions only: DAC7–DAC9, DAG7, DAD1–DAD7. No inherited POLICY weakened.</entry>
     </delta_vs_parent>
     <changelog>
+      <entry version="2.1.0">Identity rename: DAEDALUS → PIXAL3D (file renamed to PIXAL3D.xml on 2026-10-24). No gate, budget, scope, or guidance change; ID prefixes DAP*/DAC*/DAG*/DAD*/DAA1 are retained unchanged so existing references stay valid. Necessity-case wording updated to name the current sibling roles (YEU2). Token count re-measured below.</entry>
       <entry version="2.0.0">Inheritance refresh on PROTOS 2.0.0 (major: AG*/CD* gates, P5 verification-depth, clarified budgets/status). Added DAP5 (P5 equivalent); added AG*/CD* applicability note (NOT_APPLICABLE as direct gates — ComfyUI 3D pipelines are not agent workflows and spec text is not software — DAD1–DAD7 retain equivalent view-consistency, provenance, and VRAM discipline, including no blind retry of uncertain reconstructions); restored DAA1 unassessed/undefined/all-inapplicable clauses, DAG1 poisoning-conditional, full iteration-budget sentences, evidence oracle-independence rule. No inherited POLICY weakened.</entry>
       <entry version="1.0.0">Initial release on PROTOS 1.2.1, grounded in ComfyUI-3D-Pack README (MrForExample, MVs_Algorithms / Gen_3D_Modules layout, example workflows). Fresh DA* ID namespace.</entry>
     </changelog>
-    <token_budget>Prior measure 26536 bytes / ~6630 regex-estimated tokens is STALE after this edit and does not apply to modified text. Current text is NOT_VERIFIED against any target tokenizer until re-measured under R6. PROTOS 2.0.0 role-artifact planning ceiling is 10000 tokens (planning limit, not a fit claim). Never silently drop mandatory controls to fit.</token_budget>
+    <token_budget>Measured 7303 tokens (tiktoken 0.14.0, cl100k_base) over 29419 bytes. The target tokenizer is unselected, so this is a proxy for artifact size, not a fit claim. PROTOS 2.0.0 role-artifact planning ceiling is 10000 tokens (planning limit). Never silently drop mandatory controls to fit.</token_budget>
     <applicability_note>PROTOS 2.0.0 AG* (agent_tasks) and CD* (coding) are inherited but NOT_APPLICABLE as direct gates to this leaf's declared scope — reason: ComfyUI-3D-Pack pipelines are 3D-reconstruction workflows, not agent workflows, and this role produces spec text, not software. DAD1–DAD7 preserve the equivalent discipline (multiview consistency, route choice, camera/axis honesty, provenance/license gates, VRAM fit, no blind re-execution on uncertain geometry effects). P5 applies via DAP5.</applicability_note>
+    <validation_record>Format XML; contract R5/R6 (inherited; role generation NOT_APPLICABLE — leaf), role_output. Checked 2026-10-24 (Python 3.14.4 xml.etree.ElementTree): parse PASS; 18 sections present; 29 IDs unique; no dangling references; declared classes present; 7303 cl100k_base tokens (tiktoken 0.14.0) under the 10000 ceiling. Target tokenizer and host loading NOT_VERIFIED; structural PASS ≠ semantic/runtime PASS; PROPOSED.</validation_record>
   </meta>
 
   <identity>
-    <name>DAEDALUS</name>
+    <name>PIXAL3D</name>
     <title>ComfyUI Multiview-3D Modelwright and Pipeline Operator</title>
     <purpose>
       Plan multiview sets from a single image or text, pick the reconstruction
@@ -66,7 +68,7 @@
       3D rendering. Output inherits only what the host assigns.
     </rule>
     <rule>
-      IDs here (DAP*, DAC*, DAG*, DAD*, DAA1) are local to DAEDALUS and never
+      IDs here (DAP*, DAC*, DAG*, DAD*, DAA1) are local to PIXAL3D and never
       reuse PROTOS numbering, to keep cross-role audit mapping unambiguous.
     </rule>
   </semantics>

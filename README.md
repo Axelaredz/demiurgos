@@ -72,7 +72,7 @@ PROTOS 4.0.0  (корень, мета-генератор ролей, для аг
 
 **Отличия от PROTOS 4.0.0 (DELTA):** новый неймспейс `DP*/DC*/DG*/DR*/DA1`; добавлен DG7 (системный промпт не воспроизводится, OWASP LLM07) и `top_sandwich`; DR6 стал format-aware (парсер под выбранный формат, замер именованным токенизатором, различия `NOT_APPLICABLE`/`NOT_VERIFIED`); добавлены `waiver_rule` и `COMPLETE_WITH_WAIVER`; явный `web_assumption`; целевая экономия ≤2500 токенов на дочерние артефакты. Ослабленных POLICY нет.
 
-#### 3. MEFISTOFEL `MEFISTOFEL.xml` — v10.0.0, 9 426 токенов
+#### 3. MEFISTOFEL `MEFISTOFEL.xml` — v10.0.1, 9 479 токенов
 
 **Кто:** VK Content Editor — evidence-aware Russian social content. Редактор VK-контента с явной эпистемической моделью.
 
@@ -103,7 +103,7 @@ PROTOS 4.0.0  (корень, мета-генератор ролей, для аг
 
 **Ключевые политики:** WC9 — PROMPT и NEGATIVE только на английском; WD1 — анатомия промпта; WD4 — изоляция текста; WG7 — safety (без запрещёнки); WG8 — системный промпт не воспроизводится (OWASP LLM07); шрифтовая оговорка: неподтверждённая кириллическая поддержка = `NOT_VERIFIED`.
 
-#### 5. YEU2 `YEU2.xml` — v2.0.0, 6 619 токенов
+#### 5. YEU2 `YEU2.xml` — v2.1.0, 6 818 токенов
 
 **Кто:** ComfyUI YuE2 Songwright and Workflow Operator. Сонграйтер + оператор музыкального пайплайна.
 
@@ -119,7 +119,7 @@ PROTOS 4.0.0  (корень, мета-генератор ролей, для аг
 
 **Гейты:** AMC7 — только заявленные чекпоинты, никаких выдуманных имён файлов/хешей; AMC8 — только документированные параметры; AMC9 — лицензия (персональное/авторское с монетизацией — бесплатно, академическое — некоммерческое, коммерческое использование весов компанией — нужна коммерческая лицензия); AMG7 — музыкальная безопасность (никакого нелегального/ненавистнического контента, каверы — только personal/learning без прав на релиз, чужой вокал не выдавать за свой).
 
-#### 6. PIXAL3D `PIXAL3D.xml` — v2.0.0, 7 076 токенов
+#### 6. PIXAL3D `PIXAL3D.xml` — v2.1.0, 7 303 токена
 
 **Кто:** ComfyUI Multiview-3D Modelwright and Pipeline Operator. Оператор multiview-пайплайна ComfyUI-3D-Pack.
 
@@ -197,7 +197,7 @@ PROTOS 4.0.0  (корень, мета-генератор ролей, для аг
 - **Minimum Viable Rules:** правило добавляется только под явное требование, наблюдаемый сбой или измеримую деградацию.
 - **Статусная модель:** `PASS` / `FAIL` / `NOT_APPLICABLE` / `NOT_VERIFIED` / `BLOCKED`. Агрегация: любой FAIL → FAIL, иначе BLOCKED → BLOCKED, иначе NOT_VERIFIED → NOT_VERIFIED, иначе PASS. Отсутствие доказательств — это `NOT_VERIFIED`, никогда не PASS.
 - **Доказательства честные:** чтение файла доказывает только статику; «читается хорошо» — не доказательство качества; цифры, хеши, тесты не выдумываются.
-- **Токены:** цифры в заголовках сняты `cl100k_base` (tiktoken 0.14.0) по файлу целиком. Целевой токенизатор не выбран, поэтому это прокси для сравнения артефактов, а не гарантия посадки в контекст конкретной модели; каждая роль дополнительно фиксирует собственный замер и потолок 10 000 токенов. У `YEU2` и `PIXAL3D` собственный замер в файле помечен `STALE`/`NOT_VERIFIED` — цифры в README сняты этой правкой и остаются прокси.
+- **Токены:** цифры в заголовках сняты `cl100k_base` (tiktoken 0.14.0) по файлу целиком. Целевой токенизатор не выбран, поэтому это прокси для сравнения артефактов, а не гарантия посадки в контекст конкретной модели; каждая роль дополнительно фиксирует собственный замер и потолок 10 000 токенов. Собственный замер каждой роли зафиксирован в её `meta/validation_record`; совпадение с цифрой в README проверяется при каждой правке файла.
 - **Версионирование:** `major` — изменение гейтов, `minor` — новая guidance, `patch` — формулировки. Версия, дата и changelog обновляются вместе.
 
 ### Как пользоваться репозиторием
@@ -277,7 +277,7 @@ The tree shows the role family: every child file is re-based on PROTOS 4.0.0 exc
 
 **DELTA vs PROTOS 4.0.0:** fresh `DP*/DC*/DG*/DR*/DA1` namespace; added DG7 (no system-prompt reproduction, OWASP LLM07) and `top_sandwich`; DR6 is format-aware (per-format parser, named-tokenizer count, `NOT_APPLICABLE`/`NOT_VERIFIED` distinctions); added `waiver_rule` and `COMPLETE_WITH_WAIVER`; explicit `web_assumption`; child-artifact budget target ≤2500 tokens. No inherited POLICY weakened.
 
-#### 3. MEFISTOFEL `MEFISTOFEL.xml` — v10.0.0, 9,426 tokens
+#### 3. MEFISTOFEL `MEFISTOFEL.xml` — v10.0.1, 9,479 tokens
 
 **Who:** VK Content Editor — evidence-aware Russian social content.
 
@@ -308,7 +308,7 @@ The tree shows the role family: every child file is re-based on PROTOS 4.0.0 exc
 
 **Key policies:** WC9 — PROMPT and NEGATIVE in English only; WD1 — prompt anatomy; WD4 — text isolation; WG7 — safety; WG8 — no system-prompt reproduction (OWASP LLM07); font caveat: unconfirmed Cyrillic support = `NOT_VERIFIED`.
 
-#### 5. YEU2 `YEU2.xml` — v2.0.0, 6,619 tokens
+#### 5. YEU2 `YEU2.xml` — v2.1.0, 6,818 tokens
 
 **Who:** ComfyUI YuE2 Songwright and Workflow Operator. Songwriter + music-pipeline operator.
 
@@ -324,7 +324,7 @@ The tree shows the role family: every child file is re-based on PROTOS 4.0.0 exc
 
 **Gates:** AMC7 — only stated checkpoints, no invented filenames/hashes; AMC8 — only documented parameters; AMC9 — license (personal/creator incl. monetization free, academic non-commercial, company commercial use needs a commercial license); AMG7 — music safety (no illegal/hateful content, covers personal/learning only without release rights, never pass off чужой vocal).
 
-#### 6. PIXAL3D `PIXAL3D.xml` — v2.0.0, 7,076 tokens
+#### 6. PIXAL3D `PIXAL3D.xml` — v2.1.0, 7,303 tokens
 
 **Who:** ComfyUI Multiview-3D Modelwright and Pipeline Operator. Multiview-pipeline operator for ComfyUI-3D-Pack.
 
@@ -402,7 +402,7 @@ The tree shows the role family: every child file is re-based on PROTOS 4.0.0 exc
 - **Minimum Viable Rules:** a rule is added only for an explicit requirement, observed failure, or measurable degradation.
 - **Status model:** `PASS` / `FAIL` / `NOT_APPLICABLE` / `NOT_VERIFIED` / `BLOCKED`. Aggregation: any FAIL → FAIL, else BLOCKED → BLOCKED, else NOT_VERIFIED → NOT_VERIFIED, else PASS. Missing evidence is `NOT_VERIFIED`, never PASS.
 - **Honest evidence:** reading a file proves static properties only; "reads well" proves nothing; no invented numbers, hashes, or tests.
-- **Tokens:** figures in headings are measured over the whole file with `cl100k_base` (tiktoken 0.14.0). The target tokenizer is unselected, so this is a proxy for comparing artifacts, not a guarantee of fitting a specific model's context; each role also records its own measurement and a 10,000-token ceiling. `YEU2` and `PIXAL3D` mark their in-file measurement as `STALE`/`NOT_VERIFIED`; the README figures were taken by this revision and remain a proxy.
+- **Tokens:** figures in headings are measured over the whole file with `cl100k_base` (tiktoken 0.14.0). The target tokenizer is unselected, so this is a proxy for comparing artifacts, not a guarantee of fitting a specific model's context; each role also records its own measurement and a 10,000-token ceiling. Each role records its own measurement in `meta/validation_record`; the README figure is re-checked whenever the file changes.
 - **Versioning:** `major` — gate changes, `minor` — new guidance, `patch` — wording. Version, date, changelog move together.
 
 ### How to use this repo
@@ -482,7 +482,7 @@ PROTOS 4.0.0  （根，角色元生成器，面向带工具的 agent）
 
 **相对 PROTOS 4.0.0 的 DELTA：** 新命名空间 `DP*/DC*/DG*/DR*/DA1`；新增 DG7（不复述系统提示词，OWASP LLM07）与 `top_sandwich`；DR6 改为 format-aware（按格式选择解析器、用命名分词器计量、区分 `NOT_APPLICABLE`/`NOT_VERIFIED`）；新增 `waiver_rule` 与 `COMPLETE_WITH_WAIVER`；显式 `web_assumption`；子制品目标 ≤2500 tokens。没有削弱任何继承的 POLICY。
 
-#### 3. MEFISTOFEL `MEFISTOFEL.xml` — v10.0.0，9,426 tokens
+#### 3. MEFISTOFEL `MEFISTOFEL.xml` — v10.0.1，9,479 tokens
 
 **身份：** VK Content Editor — evidence-aware Russian social content，带显式认知模型的内容编辑。
 
@@ -513,7 +513,7 @@ PROTOS 4.0.0  （根，角色元生成器，面向带工具的 agent）
 
 **关键策略：** WC9 — PROMPT 与 NEGATIVE 只用英文；WD1 — 提示词解剖；WD4 — 文字隔离；WG7 — 安全；WG8 — 不复述系统提示词（OWASP LLM07）；字体声明：西里尔覆盖未确认即 `NOT_VERIFIED`。
 
-#### 5. YEU2 `YEU2.xml` — v2.0.0，6,619 tokens
+#### 5. YEU2 `YEU2.xml` — v2.1.0，6,818 tokens
 
 **身份：** ComfyUI YuE2 Songwright and Workflow Operator，词曲作者 + 音乐管线操作员。
 
@@ -529,7 +529,7 @@ PROTOS 4.0.0  （根，角色元生成器，面向带工具的 agent）
 
 **门控：** AMC7 只引用已声明 checkpoint，不编文件名/hash；AMC8 只用文档化参数；AMC9 许可（个人/创作者含变现免费、学术非商用、公司商用权重需商业许可）；AMG7 音乐安全（禁违法/仇恨内容，翻唱默认仅 personal/learning，发行需确权，不冒充他人声音）。
 
-#### 6. PIXAL3D `PIXAL3D.xml` — v2.0.0，7,076 tokens
+#### 6. PIXAL3D `PIXAL3D.xml` — v2.1.0，7,303 tokens
 
 **身份：** ComfyUI Multiview-3D Modelwright and Pipeline Operator，ComfyUI-3D-Pack 多视图 3D 管线操作员。
 
@@ -607,7 +607,7 @@ PROTOS 4.0.0  （根，角色元生成器，面向带工具的 agent）
 - **Minimum Viable Rules：** 只有在明确需求、观测到的失败或可测量的退化下才加规则。
 - **状态模型：** `PASS` / `FAIL` / `NOT_APPLICABLE` / `NOT_VERIFIED` / `BLOCKED`。聚合：任一 FAIL → FAIL，否则 BLOCKED → BLOCKED，否则 NOT_VERIFIED → NOT_VERIFIED，否则 PASS。缺证据即 `NOT_VERIFIED`，绝不是 PASS。
 - **诚实证据：** 读文件只证明静态属性；"读起来不错"不是质量证据；不编造数字、hash 与测试。
-- **Tokens：** 标题中的数字按整份文件用 `cl100k_base`（tiktoken 0.14.0）测算。目标分词器尚未选定，因此这只是用于比较制品体积的代理指标，不保证适配某个具体模型的上下文；每个角色自身另记录测量值与 10,000 tokens 上限。`YEU2` 与 `PIXAL3D` 文件内自带的测算标记为 `STALE`/`NOT_VERIFIED`；README 中的数字由本次修订测算，仍属代理指标。
+- **Tokens：** 标题中的数字按整份文件用 `cl100k_base`（tiktoken 0.14.0）测算。目标分词器尚未选定，因此这只是用于比较制品体积的代理指标，不保证适配某个具体模型的上下文；每个角色自身另记录测量值与 10,000 tokens 上限。每个角色在 `meta/validation_record` 中记录自身测算值；文件每次修改时都会重新核对 README 中的数字。
 - **版本：** `major` 门控变更，`minor` 新增指引，`patch` 措辞。版本、日期、changelog 联动更新。
 
 ### 仓库使用方法
