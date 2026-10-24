@@ -30,14 +30,15 @@ PROTOS 4.0.0  (корень, мета-генератор ролей, для аг
 ├── PIXAL3D 2.0.0     (листовой: multiview-3D и workflow для ComfyUI-3D-Pack)
 ├── PLAYCANVAS 4.0.0  (листовой: браузерные мультиплеерные 3D-игры на PlayCanvas Engine)
 ├── BLENDER 1.0.0     (листовой: Blender 5.x → GLB для веба: bpy/MCP, Draco/meshopt, KTX2)
-└── HTMLFORGE 1.0.0   (листовой: мобильный HTML/CSS/JS и арт-дирекшн cyberpunk/sci-fi/anime)
+├── HTMLFORGE 1.0.0   (листовой: мобильный HTML/CSS/JS и арт-дирекшн cyberpunk/sci-fi/anime)
+└── PLAYCANVAS-NPC 1.0.0 (листовой: NPC AI на PlayCanvas — навигация, восприятие, поведение, анимация, диалог, крауды)
 ```
 
 Дерево показывает семейство ролей: все дочерние файлы перебазированы на PROTOS 4.0.0, кроме `YEU2` и `PIXAL3D` — они остаются на 2.0.0.
 
 * Генераторы (`PROTOS`, `DEMIURGOS`) умеют создавать новые роли.
-* Листовые роли (`MEFISTOFEL`, `WANGOG`, `YEU2`, `PIXAL3D`, `PLAYCANVAS`, `BLENDER`, `HTMLFORGE`) новых ролей не создают — только артефакты своего домена.
-* У каждой роли свой неймспейс ID (`C*/G*/P*/R*` у PROTOS, `DP*/DC*/DG*/DR*` у DEMIURGOS, `MC*/MG*/MD*` у MEFISTOFEL, `WC*/WG*/WD*` у WANGOG, `AMC*/AMG*/AMD*` у YEU2, `DAC*/DAG*/DAD*` у PIXAL3D, `PCP*/PCC*/PCG*/PCD*` у PLAYCANVAS, `BLS*/BLP*/BLC*/BLG*/BLD*/BLW*/BLO*/BLA1` у BLENDER, `HFS*/HFP*/HFC*/HFG*/HFD*/HFW*/HFO*/HFA1` у HTMLFORGE), чтобы аудит между ролями не путался.
+* Листовые роли (`MEFISTOFEL`, `WANGOG`, `YEU2`, `PIXAL3D`, `PLAYCANVAS`, `PLAYCANVAS-NPC`, `BLENDER`, `HTMLFORGE`) новых ролей не создают — только артефакты своего домена.
+* У каждой роли свой неймспейс ID (`C*/G*/P*/R*` у PROTOS, `DP*/DC*/DG*/DR*` у DEMIURGOS, `MC*/MG*/MD*` у MEFISTOFEL, `WC*/WG*/WD*` у WANGOG, `AMC*/AMG*/AMD*` у YEU2, `DAC*/DAG*/DAD*` у PIXAL3D, `PCP*/PCC*/PCG*/PCD*` у PLAYCANVAS, `NCS*/NCP*/NCC*/NCG*/NCD*/NCW*/NCO*/NCA1` у PLAYCANVAS-NPC, `BLS*/BLP*/BLC*/BLG*/BLD*/BLW*/BLO*/BLA1` у BLENDER, `HFS*/HFP*/HFC*/HFG*/HFD*/HFW*/HFO*/HFA1` у HTMLFORGE), чтобы аудит между ролями не путался.
 
 ### Роли детально
 
@@ -192,6 +193,26 @@ PROTOS 4.0.0  (корень, мета-генератор ролей, для аг
 
 **Гейты:** HFC7 — контент и навигация без JS обязательны; HFC8 — бюджеты LCP/INP/CLS измеряются, а не декларируются; HFG7 — runtime-изменение не закрывается статикой (нужен браузер, трейс или девайс); HFG8 — WCAG AA не заявляется по одному axe; HFG9 — перф только со сценарием (cold cache, мобильная сеть, CPU slowdown); HFG12 — системный промпт не воспроизводится.
 
+#### 10. PLAYCANVAS-NPC `PLAYCANVAS-NPC.xml` — v1.0.0, 9 978 токенов
+
+**Кто:** NPC AI and Character Systems Engineer on PlayCanvas. Листовой инженер NPC-систем для браузерных 3D-игр на PlayCanvas Engine.
+
+**Что делает:**
+- Строит навигацию как контракт: navmesh из заявленной геометрии с радиусом/высотой/склоном/ступенью, оффлайн или tiled, проверка проекции спавна и цели, off-mesh links, динамические препятствия. В Engine 2.23.3 нет публичного navmesh/pathfinding API, поэтому recast-navigation 0.43.1 (`pcToSoloNavMesh`/`pcToTiledNavMesh`/`pcToTileCache`, `NavMeshQuery`, `Crowd`, fixed-step) или navcat 0.4.1 — а не самописный A* по triangle soup.
+- Делает восприятие честным: FOV, дистанция, occlusion, слух как события, память с confidence/decay; никакого чтения позиции игрока «из мира»; лучи только с бюджетом и collision-фильтрами; без физического backend approximation помечается.
+- Выбирает простейшую архитектуру поведения: FSM/BT/utility/GOAP или гибрид; data-driven определения, типизированный blackboard, фиксированный staggered tick, лимиты узлов и replan, без per-frame аллокаций.
+- Связывает симуляцию с анимацией: параметры anim state graph, слои/маски, blend trees, root-motion policy, anim events только для косметики, контроль foot sliding. VAT — только для дешёвых краудов: одна skinned mesh/материал, циклы, без blending/IK.
+- Проектирует генеративный диалог безопасно: LLM за серверным прокси (ключи не в браузере), typed intent вместо прямого изменения состояния, prompt-injection и output moderation, ограниченная память, latency/бюджет, fallback; OWASP LLM01.
+- Держит крауды и LOD: tiers hero/simulated/background, разные частоты решений, восприятия и анимации, spatial partition, лимит агентов на кадр, замеры AppStats до/после.
+- В мультиплеере сервер владеет NPC (spawn, позиция, здоровье, цель, лут), клиент только предсказывает и рендерит; снапшоты, интерполяция, interest management, анти-чит.
+- Проверяет детерминированно: headless Node (`NullGraphicsDevice`, `app.update(dt)`), seed/tick, сценарии (off-navmesh spawn, unreachable goal, lost target, provider timeout), браузер, крауд/soak, два клиента, eval диалога.
+
+**Когда использовать:** нужны NPC в PlayCanvas — патрули, погони, крауды, диалоги, боссы — или аудит существующего NPC-кода на «ходит ли, видит ли, не читерит ли, не падает ли».
+
+**Команды:** `/brain`, `/nav`, `/perception`, `/anim`, `/dialogue`, `/crowd`, `/net`, `/verify`, `/review`, `/converge`, `/mode`, `/debug`.
+
+**Гейты:** NCC7 — только реальные API установленной версии; NCC8 — сервер владеет NPC; NCC9 — вывод LLM не действие; NCC10 — navmesh-контракт; NCC13 — seed/tick; NCC14 — контент-безопасность; NCG7 — runtime не закрывается статикой; NCG8 — навигация, LOS и крауды не заявляются из чтения кода; NCG11 — generative NPC safety; NCG10 — системный промпт не воспроизводится.
+
 ### Общие принципы всех ролей
 
 - **Minimum Viable Rules:** правило добавляется только под явное требование, наблюдаемый сбой или измеримую деградацию.
@@ -235,14 +256,15 @@ PROTOS 4.0.0  (root, meta-generator of roles, for agents with tools)
 ├── PIXAL3D 2.0.0     (leaf: multiview-3D and workflows for ComfyUI-3D-Pack)
 ├── PLAYCANVAS 4.0.0  (leaf: browser multiplayer 3D games on the PlayCanvas Engine)
 ├── BLENDER 1.0.0     (leaf: Blender 5.x → web GLB: bpy/MCP, Draco/meshopt, KTX2)
-└── HTMLFORGE 1.0.0   (leaf: mobile HTML/CSS/JS and cyberpunk/sci-fi/anime art direction)
+├── HTMLFORGE 1.0.0   (leaf: mobile HTML/CSS/JS and cyberpunk/sci-fi/anime art direction)
+└── PLAYCANVAS-NPC 1.0.0 (leaf: NPC AI on PlayCanvas — navigation, perception, behaviour, animation, dialogue, crowds)
 ```
 
 The tree shows the role family: every child file is re-based on PROTOS 4.0.0 except `YEU2` and `PIXAL3D`, which stay on 2.0.0.
 
 * Generators (`PROTOS`, `DEMIURGOS`) can create new roles.
-* Leaf roles (`MEFISTOFEL`, `WANGOG`, `YEU2`, `PIXAL3D`, `PLAYCANVAS`, `BLENDER`, `HTMLFORGE`) never generate roles — only artifacts of their domain.
-* Each role has its own ID namespace (`C*/G*/P*/R*`, `DP*/DC*/DG*/DR*`, `MC*/MG*/MD*`, `WC*/WG*/WD*`, `AMC*/AMG*/AMD*`, `DAC*/DAG*/DAD*`, `PCP*/PCC*/PCG*/PCD*`, `BLS*/BLP*/BLC*/BLG*/BLD*/BLW*/BLO*/BLA1`, `HFS*/HFP*/HFC*/HFG*/HFD*/HFW*/HFO*/HFA1`) so cross-role audits stay unambiguous.
+* Leaf roles (`MEFISTOFEL`, `WANGOG`, `YEU2`, `PIXAL3D`, `PLAYCANVAS`, `PLAYCANVAS-NPC`, `BLENDER`, `HTMLFORGE`) never generate roles — only artifacts of their domain.
+* Each role has its own ID namespace (`C*/G*/P*/R*`, `DP*/DC*/DG*/DR*`, `MC*/MG*/MD*`, `WC*/WG*/WD*`, `AMC*/AMG*/AMD*`, `DAC*/DAG*/DAD*`, `PCP*/PCC*/PCG*/PCD*`, `NCS*/NCP*/NCC*/NCG*/NCD*/NCW*/NCO*/NCA1`, `BLS*/BLP*/BLC*/BLG*/BLD*/BLW*/BLO*/BLA1`, `HFS*/HFP*/HFC*/HFG*/HFD*/HFW*/HFO*/HFA1`) so cross-role audits stay unambiguous.
 
 ### Roles in detail
 
@@ -397,6 +419,26 @@ The tree shows the role family: every child file is re-based on PROTOS 4.0.0 exc
 
 **Gates:** HFC7 — content and navigation must work without JS; HFC8 — LCP/INP/CLS budgets are measured, not declared; HFG7 — a runtime change never closes on static review (browser, trace, or device required); HFG8 — no WCAG AA claim from axe alone; HFG9 — performance only with a scenario (cold cache, mobile network, CPU slowdown); HFG12 — no system-prompt reproduction.
 
+#### 10. PLAYCANVAS-NPC `PLAYCANVAS-NPC.xml` — v1.0.0, 9,978 tokens
+
+**Who:** NPC AI and Character Systems Engineer on PlayCanvas. A leaf engineer for NPC systems in browser 3D games on the PlayCanvas Engine.
+
+**What it does:**
+- Treats navigation as a contract: navmesh from declared geometry with agent radius/height/slope/step, offline or tiled generation, projected spawns and goals, off-mesh links, dynamic obstacles. Engine 2.23.3 exposes no public navmesh/pathfinding API, so it uses recast-navigation 0.43.1 (`pcToSoloNavMesh`/`pcToTiledNavMesh`/`pcToTileCache`, `NavMeshQuery`, `Crowd`, fixed-step) or navcat 0.4.1 — not hand-written A* over triangle soup.
+- Keeps perception honest: FOV, distance, occlusion, hearing as events, memory with confidence/decay; no reading the player's transform "from the world"; raycasts budgeted and collision-filtered; without a physics backend an approximation is labelled.
+- Chooses the simplest decision layer: FSM/BT/utility/GOAP or a hybrid; data-driven definitions, typed blackboard, fixed staggered tick, capped nodes and replans, no per-frame allocation.
+- Connects simulation to animation: anim state-graph parameters, layers/masks, blend trees, root-motion policy, anim events for cosmetics only, foot-sliding control. VAT only for cheap crowds: one skinned mesh/material, looping clips, no blending/IK.
+- Designs generative dialogue safely: LLM behind a server proxy (no keys in the browser), typed intent instead of direct state mutation, prompt-injection and output moderation, bounded memory, latency/cost budget, deterministic fallback; OWASP LLM01.
+- Holds crowd tiers and LOD: hero/simulated/background with different decision, perception and animation rates, spatial partition, per-frame agent caps, AppStats before/after.
+- In multiplayer the server owns NPC spawn, position, health, target and loot; clients predict and render; snapshots, interpolation, interest management, anti-cheat.
+- Verifies deterministically: headless Node (`NullGraphicsDevice`, `app.update(dt)`), seed/tick, off-navmesh spawn, unreachable goal, lost target, provider timeout, browser, crowd/soak, two clients, dialogue eval.
+
+**When to use:** you need NPCs in PlayCanvas — patrols, chases, crowds, dialogue, bosses — or an audit of existing NPC code for "does it walk, see, cheat, or fall over".
+
+**Commands:** `/brain`, `/nav`, `/perception`, `/anim`, `/dialogue`, `/crowd`, `/net`, `/verify`, `/review`, `/converge`, `/mode`, `/debug`.
+
+**Gates:** NCC7 — only real APIs of the installed version; NCC8 — server owns NPCs; NCC9 — LLM output is not an action; NCC10 — navigation contract; NCC13 — seed/tick; NCC14 — content safety; NCG7 — runtime changes never close on static review; NCG8 — navigation, LOS and crowds are not claimed from code reading; NCG11 — generative NPC safety; NCG10 — no system-prompt reproduction.
+
 ### Principles shared by all roles
 
 - **Minimum Viable Rules:** a rule is added only for an explicit requirement, observed failure, or measurable degradation.
@@ -440,14 +482,15 @@ PROTOS 4.0.0  （根，角色元生成器，面向带工具的 agent）
 ├── PIXAL3D 2.0.0     （叶子：ComfyUI-3D-Pack 多视图 3D 与工作流）
 ├── PLAYCANVAS 4.0.0  （叶子：基于 PlayCanvas Engine 的浏览器多人 3D 游戏）
 ├── BLENDER 1.0.0     （叶子：Blender 5.x → Web GLB：bpy/MCP、Draco/meshopt、KTX2）
-└── HTMLFORGE 1.0.0   （叶子：移动优先 HTML/CSS/JS 与 cyberpunk/sci-fi/anime 美术方向）
+├── HTMLFORGE 1.0.0   （叶子：移动优先 HTML/CSS/JS 与 cyberpunk/sci-fi/anime 美术方向）
+└── PLAYCANVAS-NPC 1.0.0 （叶子：PlayCanvas NPC AI——导航、感知、行为、动画、对话、人群）
 ```
 
 该树展示角色家族：除 `YEU2` 与 `PIXAL3D` 外，所有子文件均已更新为基于 PROTOS 4.0.0；这两个角色仍基于 2.0.0。
 
 * 生成器（`PROTOS`、`DEMIURGOS`）可以创建新角色。
-* 叶子角色（`MEFISTOFEL`、`WANGOG`、`YEU2`、`PIXAL3D`、`PLAYCANVAS`、`BLENDER`、`HTMLFORGE`）不生成角色，只产出各自领域的制品。
-* 每个角色拥有独立 ID 命名空间（`C*/G*/P*/R*`、`DP*/DC*/DG*/DR*`、`MC*/MG*/MD*`、`WC*/WG*/WD*`、`AMC*/AMG*/AMD*`、`DAC*/DAG*/DAD*`、`PCP*/PCC*/PCG*/PCD*`、`BLS*/BLP*/BLC*/BLG*/BLD*/BLW*/BLO*/BLA1`、`HFS*/HFP*/HFC*/HFG*/HFD*/HFW*/HFO*/HFA1`），跨角色审计不会混淆。
+* 叶子角色（`MEFISTOFEL`、`WANGOG`、`YEU2`、`PIXAL3D`、`PLAYCANVAS`、`PLAYCANVAS-NPC`、`BLENDER`、`HTMLFORGE`）不生成角色，只产出各自领域的制品。
+* 每个角色拥有独立 ID 命名空间（`C*/G*/P*/R*`、`DP*/DC*/DG*/DR*`、`MC*/MG*/MD*`、`WC*/WG*/WD*`、`AMC*/AMG*/AMD*`、`DAC*/DAG*/DAD*`、`PCP*/PCC*/PCG*/PCD*`、`NCS*/NCP*/NCC*/NCG*/NCD*/NCW*/NCO*/NCA1`、`BLS*/BLP*/BLC*/BLG*/BLD*/BLW*/BLO*/BLA1`、`HFS*/HFP*/HFC*/HFG*/HFD*/HFW*/HFO*/HFA1`），跨角色审计不会混淆。
 
 ### 角色详解
 
@@ -601,6 +644,26 @@ PROTOS 4.0.0  （根，角色元生成器，面向带工具的 agent）
 **命令：** `/art`、`/perf`、`/a11y`、`/motion`、`/review`、`/verify`。
 
 **门控：** HFC7 —— 内容与导航必须在无 JS 时可用；HFC8 —— LCP/INP/CLS 预算必须实测，不能口头声明；HFG7 —— 运行时变更不能只靠静态审查结案（需浏览器、trace 或真机）；HFG8 —— 不能仅凭 axe 宣称 WCAG AA；HFG9 —— 性能必须带场景（冷缓存、移动网络、CPU 降速）；HFG12 —— 不复述系统提示词。
+
+#### 10. PLAYCANVAS-NPC `PLAYCANVAS-NPC.xml` — v1.0.0，9,978 tokens
+
+**身份：** NPC AI and Character Systems Engineer on PlayCanvas。面向 PlayCanvas Engine 浏览器 3D 游戏的 NPC 系统叶子工程师。
+
+**做什么：**
+- 把导航当契约：用声明几何生成 navmesh，明确 agent 半径/高度/坡度/台阶，离线或 tiled，投影出生点与目标，处理 off-mesh link 和动态障碍。Engine 2.23.3 没有公开 navmesh/pathfinding API，所以用 recast-navigation 0.43.1（`pcToSoloNavMesh`/`pcToTiledNavMesh`/`pcToTileCache`、`NavMeshQuery`、`Crowd`、fixed-step）或 navcat 0.4.1，而不是在 triangle soup 上手写 A*。
+- 让感知诚实：FOV、距离、遮挡、听觉事件、带 confidence/decay 的记忆；不直接读取玩家「世界状态」；射线有预算和碰撞过滤；没有物理后端时明确标注为近似。
+- 选最简单的决策层：FSM/BT/utility/GOAP 或混合；数据驱动定义、类型化 blackboard、固定且错峰的 tick、节点与 replan 上限、避免每帧分配。
+- 把模拟接到动画：anim state graph 参数、层/遮罩、blend tree、root motion 策略、anim event 只做表现、控制滑步。VAT 只用于廉价人群：单一 skinned mesh/材质、循环片段、无 blending/IK。
+- 安全地设计生成式对话：LLM 放在服务端代理后（浏览器无密钥）、用 typed intent 而不是直接改状态、prompt injection 与输出审核、受限记忆、延迟/成本预算、确定性 fallback；OWASP LLM01。
+- 管理人群与 LOD：hero/simulated/background 三层，不同决策/感知/动画频率、空间分区、每帧 agent 上限、优化前后 AppStats 测量。
+- 多人游戏中服务器拥有 NPC 的 spawn、位置、生命、目标与掉落；客户端只预测和渲染；快照、插值、interest management、反作弊。
+- 确定性验证：headless Node（`NullGraphicsDevice`、`app.update(dt)`）、seed/tick、off-navmesh spawn、不可达目标、丢失目标、provider timeout、浏览器、人群/soak、双客户端、对话 eval。
+
+**何时用：** 需要在 PlayCanvas 中做 NPC（巡逻、追击、人群、对话、Boss），或审计现有 NPC 代码「会不会走、会不会看、会不会作弊、会不会崩」。
+
+**命令：** `/brain`、`/nav`、`/perception`、`/anim`、`/dialogue`、`/crowd`、`/net`、`/verify`、`/review`、`/converge`、`/mode`、`/debug`。
+
+**门控：** NCC7 —— 只用已安装版本的真实 API；NCC8 —— 服务器拥有 NPC；NCC9 —— LLM 输出不是行动；NCC10 —— 导航契约；NCC13 —— seed/tick；NCC14 —— 内容安全；NCG7 —— runtime 变更不能靠静态审查结案；NCG8 —— 导航、LOS、人群不能从读代码断言；NCG11 —— 生成式 NPC 安全；NCG10 —— 不复述系统提示词。
 
 ### 所有角色的共同原则
 
