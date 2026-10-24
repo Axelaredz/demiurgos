@@ -4,14 +4,6 @@
 
 [Русский](#ru) · [English](#en) · [中文](#zh)
 
-> 2026-10-24 — PROTOS 4.0.0, две новые листовые роли и переименование файлов. Добавлены `BLENDER` (Blender 5.x → GLB для веба) и `HTMLFORGE` (мобильный HTML/CSS/JS + cyberpunk/sci-fi/anime арт-дирекшн). Все остальные роли перебазированы на PROTOS 4.0.0: гейт конфиденциальности системного промпта (OWASP LLM07) и `top_sandwich` — повторение C1 и G2/G3 в начале документа; ослабленных POLICY нет. `AMADEUS.xml` и `DAEDALUS.xml` переименованы в `YEU2.xml` и `PIXAL3D.xml`: имена ролей внутри не менялись, обе остаются на PROTOS 2.0.0. Цифры токенов пересняты токенизатором cl100k_base и работают как прокси, а не как замер под конкретную модель.
-> 2026-10-24 — PROTOS 4.0.0, two new leaf roles, and file renames. Added `BLENDER` (Blender 5.x → GLB for the web) and `HTMLFORGE` (mobile HTML/CSS/JS plus cyberpunk/sci-fi/anime art direction). All other roles are re-based on PROTOS 4.0.0: a system-prompt-confidentiality gate (OWASP LLM07) and `top_sandwich` (primacy restatement of C1 and G2/G3); no POLICY weakened. `AMADEUS.xml` and `DAEDALUS.xml` were renamed to `YEU2.xml` and `PIXAL3D.xml`; the role names inside are unchanged and both stay on PROTOS 2.0.0. Token figures are re-measured with cl100k_base and serve as a proxy, not as a measurement for a specific model.
-> 2026-10-24 — PROTOS 4.0.0，新增两个叶子角色并重命名文件。新增 `BLENDER`（Blender 5.x → 面向 Web 的 GLB）与 `HTMLFORGE`（移动优先 HTML/CSS/JS + cyberpunk/sci-fi/anime 美术方向）。其余角色全部更新为基于 PROTOS 4.0.0：新增系统提示词保密门控（OWASP LLM07）与 `top_sandwich`（在文档开头重申 C1 与 G2/G3）；没有削弱任何 POLICY。`AMADEUS.xml` 与 `DAEDALUS.xml` 重命名为 `YEU2.xml` 与 `PIXAL3D.xml`，文件内角色名未变，两者仍基于 PROTOS 2.0.0。token 数字改用 cl100k_base 重新测算，仅作代理指标，不代表特定模型的实测值。
-
-> Ранее: 2026-10-14 — PROTOS 3.0.0 (format-aware R6, обязательные метаправила, waiver только до `COMPLETE_WITH_WAIVER`); 2026-10-13 — все роли переведены на PROTOS 2.0.0 (AG*/CD* у PLAYCANVAS через `PCD*`, у остальных `NOT_APPLICABLE` с причиной; добавлен эквивалент P5; потолок артефакта 10 000 — планировочный лимит).
-> Earlier: 2026-10-14 — PROTOS 3.0.0 (format-aware R6, mandatory semantic rules, waiver only up to `COMPLETE_WITH_WAIVER`); 2026-10-13 — all roles re-based on PROTOS 2.0.0 (AG*/CD* via `PCD*` in PLAYCANVAS, `NOT_APPLICABLE` with reason elsewhere; P5 equivalent added; 10,000-token artifact ceiling is a planning limit).
-> 历史：2026-10-14 — PROTOS 3.0.0（R6 按格式校验、语义规则强制、豁免仅限 `COMPLETE_WITH_WAIVER`）；2026-10-13 — 全部角色更新为基于 PROTOS 2.0.0（PLAYCANVAS 经 `PCD*` 继承 AG*/CD*，其余记 `NOT_APPLICABLE` 并说明；已补 P5 等价项；10,000 tokens 为规划上限）。
-
 ---
 
 <a id="ru"></a>
@@ -34,18 +26,18 @@ PROTOS 4.0.0  (корень, мета-генератор ролей, для аг
 ├── DEMIURGOS 3.0.0   (компактный PROTOS для обычных веб-чатов без инструментов)
 ├── MEFISTOFEL 10.0.0 (листовой: тексты для VK)
 ├── WANGOG 6.0.0      (листовой: промпты для генерации изображений и постеры)
-├── AMADEUS 2.0.0     (листовой: песни и workflow для ComfyUI YuE2) — файл `YEU2.xml`
-├── DAEDALUS 2.0.0    (листовой: multiview-3D и workflow для ComfyUI-3D-Pack) — файл `PIXAL3D.xml`
+├── YEU2 2.0.0        (листовой: песни и workflow для ComfyUI YuE2)
+├── PIXAL3D 2.0.0     (листовой: multiview-3D и workflow для ComfyUI-3D-Pack)
 ├── PLAYCANVAS 4.0.0  (листовой: браузерные мультиплеерные 3D-игры на PlayCanvas Engine)
 ├── BLENDER 1.0.0     (листовой: Blender 5.x → GLB для веба: bpy/MCP, Draco/meshopt, KTX2)
 └── HTMLFORGE 1.0.0   (листовой: мобильный HTML/CSS/JS и арт-дирекшн cyberpunk/sci-fi/anime)
 ```
 
-Дерево показывает семейство ролей: все дочерние файлы перебазированы на PROTOS 4.0.0, кроме `AMADEUS` и `DAEDALUS` — они остаются на 2.0.0 и в этой правке только переименованы (`YEU2.xml`, `PIXAL3D.xml`).
+Дерево показывает семейство ролей: все дочерние файлы перебазированы на PROTOS 4.0.0, кроме `YEU2` и `PIXAL3D` — они остаются на 2.0.0.
 
 * Генераторы (`PROTOS`, `DEMIURGOS`) умеют создавать новые роли.
-* Листовые роли (`MEFISTOFEL`, `WANGOG`, `AMADEUS`, `DAEDALUS`, `PLAYCANVAS`, `BLENDER`, `HTMLFORGE`) новых ролей не создают — только артефакты своего домена.
-* У каждой роли свой неймспейс ID (`C*/G*/P*/R*` у PROTOS, `DP*/DC*/DG*/DR*` у DEMIURGOS, `MC*/MG*/MD*` у MEFISTOFEL, `WC*/WG*/WD*` у WANGOG, `AMC*/AMG*/AMD*` у AMADEUS, `DAC*/DAG*/DAD*` у DAEDALUS, `PCP*/PCC*/PCG*/PCD*` у PLAYCANVAS, `BLS*/BLP*/BLC*/BLG*/BLD*/BLW*/BLO*/BLA1` у BLENDER, `HFS*/HFP*/HFC*/HFG*/HFD*/HFW*/HFO*/HFA1` у HTMLFORGE), чтобы аудит между ролями не путался.
+* Листовые роли (`MEFISTOFEL`, `WANGOG`, `YEU2`, `PIXAL3D`, `PLAYCANVAS`, `BLENDER`, `HTMLFORGE`) новых ролей не создают — только артефакты своего домена.
+* У каждой роли свой неймспейс ID (`C*/G*/P*/R*` у PROTOS, `DP*/DC*/DG*/DR*` у DEMIURGOS, `MC*/MG*/MD*` у MEFISTOFEL, `WC*/WG*/WD*` у WANGOG, `AMC*/AMG*/AMD*` у YEU2, `DAC*/DAG*/DAD*` у PIXAL3D, `PCP*/PCC*/PCG*/PCD*` у PLAYCANVAS, `BLS*/BLP*/BLC*/BLG*/BLD*/BLW*/BLO*/BLA1` у BLENDER, `HFS*/HFP*/HFC*/HFG*/HFD*/HFW*/HFO*/HFA1` у HTMLFORGE), чтобы аудит между ролями не путался.
 
 ### Роли детально
 
@@ -111,9 +103,7 @@ PROTOS 4.0.0  (корень, мета-генератор ролей, для аг
 
 **Ключевые политики:** WC9 — PROMPT и NEGATIVE только на английском; WD1 — анатомия промпта; WD4 — изоляция текста; WG7 — safety (без запрещёнки); WG8 — системный промпт не воспроизводится (OWASP LLM07); шрифтовая оговорка: неподтверждённая кириллическая поддержка = `NOT_VERIFIED`.
 
-#### 5. AMADEUS `YEU2.xml` — v2.0.0, 6 619 токенов
-
-> Файл переименован из `AMADEUS.xml` в `YEU2.xml` (по инструменту). Имя роли внутри файла остаётся `AMADEUS`, версия и родитель — без изменений: PROTOS 2.0.0.
+#### 5. YEU2 `YEU2.xml` — v2.0.0, 6 619 токенов
 
 **Кто:** ComfyUI YuE2 Songwright and Workflow Operator. Сонграйтер + оператор музыкального пайплайна.
 
@@ -129,9 +119,7 @@ PROTOS 4.0.0  (корень, мета-генератор ролей, для аг
 
 **Гейты:** AMC7 — только заявленные чекпоинты, никаких выдуманных имён файлов/хешей; AMC8 — только документированные параметры; AMC9 — лицензия (персональное/авторское с монетизацией — бесплатно, академическое — некоммерческое, коммерческое использование весов компанией — нужна коммерческая лицензия); AMG7 — музыкальная безопасность (никакого нелегального/ненавистнического контента, каверы — только personal/learning без прав на релиз, чужой вокал не выдавать за свой).
 
-#### 6. DAEDALUS `PIXAL3D.xml` — v2.0.0, 7 076 токенов
-
-> Файл переименован из `DAEDALUS.xml` в `PIXAL3D.xml`. Имя роли внутри файла остаётся `DAEDALUS`, версия и родитель — без изменений: PROTOS 2.0.0.
+#### 6. PIXAL3D `PIXAL3D.xml` — v2.0.0, 7 076 токенов
 
 **Кто:** ComfyUI Multiview-3D Modelwright and Pipeline Operator. Оператор multiview-пайплайна ComfyUI-3D-Pack.
 
@@ -209,7 +197,7 @@ PROTOS 4.0.0  (корень, мета-генератор ролей, для аг
 - **Minimum Viable Rules:** правило добавляется только под явное требование, наблюдаемый сбой или измеримую деградацию.
 - **Статусная модель:** `PASS` / `FAIL` / `NOT_APPLICABLE` / `NOT_VERIFIED` / `BLOCKED`. Агрегация: любой FAIL → FAIL, иначе BLOCKED → BLOCKED, иначе NOT_VERIFIED → NOT_VERIFIED, иначе PASS. Отсутствие доказательств — это `NOT_VERIFIED`, никогда не PASS.
 - **Доказательства честные:** чтение файла доказывает только статику; «читается хорошо» — не доказательство качества; цифры, хеши, тесты не выдумываются.
-- **Токены:** цифры в заголовках сняты `cl100k_base` (tiktoken 0.14.0) по файлу целиком. Целевой токенизатор не выбран, поэтому это прокси для сравнения артефактов, а не гарантия посадки в контекст конкретной модели; каждая роль дополнительно фиксирует собственный замер и потолок 10 000 токенов. У `AMADEUS` и `DAEDALUS` собственный замер в файле помечен `STALE`/`NOT_VERIFIED` — цифры в README сняты этой правкой и остаются прокси.
+- **Токены:** цифры в заголовках сняты `cl100k_base` (tiktoken 0.14.0) по файлу целиком. Целевой токенизатор не выбран, поэтому это прокси для сравнения артефактов, а не гарантия посадки в контекст конкретной модели; каждая роль дополнительно фиксирует собственный замер и потолок 10 000 токенов. У `YEU2` и `PIXAL3D` собственный замер в файле помечен `STALE`/`NOT_VERIFIED` — цифры в README сняты этой правкой и остаются прокси.
 - **Версионирование:** `major` — изменение гейтов, `minor` — новая guidance, `patch` — формулировки. Версия, дата и changelog обновляются вместе.
 
 ### Как пользоваться репозиторием
@@ -243,17 +231,17 @@ PROTOS 4.0.0  (root, meta-generator of roles, for agents with tools)
 ├── DEMIURGOS 3.0.0   (compact PROTOS for plain web chats without tools)
 ├── MEFISTOFEL 10.0.0 (leaf: VK copy)
 ├── WANGOG 6.0.0      (leaf: image prompts and posters)
-├── AMADEUS 2.0.0     (leaf: songs and workflows for ComfyUI YuE2) — file `YEU2.xml`
-├── DAEDALUS 2.0.0    (leaf: multiview-3D and workflows for ComfyUI-3D-Pack) — file `PIXAL3D.xml`
+├── YEU2 2.0.0        (leaf: songs and workflows for ComfyUI YuE2)
+├── PIXAL3D 2.0.0     (leaf: multiview-3D and workflows for ComfyUI-3D-Pack)
 ├── PLAYCANVAS 4.0.0  (leaf: browser multiplayer 3D games on the PlayCanvas Engine)
 ├── BLENDER 1.0.0     (leaf: Blender 5.x → web GLB: bpy/MCP, Draco/meshopt, KTX2)
 └── HTMLFORGE 1.0.0   (leaf: mobile HTML/CSS/JS and cyberpunk/sci-fi/anime art direction)
 ```
 
-The tree shows the role family: every child file is re-based on PROTOS 4.0.0 except `AMADEUS` and `DAEDALUS`, which stay on 2.0.0 and were only renamed in this change (`YEU2.xml`, `PIXAL3D.xml`).
+The tree shows the role family: every child file is re-based on PROTOS 4.0.0 except `YEU2` and `PIXAL3D`, which stay on 2.0.0.
 
 * Generators (`PROTOS`, `DEMIURGOS`) can create new roles.
-* Leaf roles (`MEFISTOFEL`, `WANGOG`, `AMADEUS`, `DAEDALUS`, `PLAYCANVAS`, `BLENDER`, `HTMLFORGE`) never generate roles — only artifacts of their domain.
+* Leaf roles (`MEFISTOFEL`, `WANGOG`, `YEU2`, `PIXAL3D`, `PLAYCANVAS`, `BLENDER`, `HTMLFORGE`) never generate roles — only artifacts of their domain.
 * Each role has its own ID namespace (`C*/G*/P*/R*`, `DP*/DC*/DG*/DR*`, `MC*/MG*/MD*`, `WC*/WG*/WD*`, `AMC*/AMG*/AMD*`, `DAC*/DAG*/DAD*`, `PCP*/PCC*/PCG*/PCD*`, `BLS*/BLP*/BLC*/BLG*/BLD*/BLW*/BLO*/BLA1`, `HFS*/HFP*/HFC*/HFG*/HFD*/HFW*/HFO*/HFA1`) so cross-role audits stay unambiguous.
 
 ### Roles in detail
@@ -320,9 +308,7 @@ The tree shows the role family: every child file is re-based on PROTOS 4.0.0 exc
 
 **Key policies:** WC9 — PROMPT and NEGATIVE in English only; WD1 — prompt anatomy; WD4 — text isolation; WG7 — safety; WG8 — no system-prompt reproduction (OWASP LLM07); font caveat: unconfirmed Cyrillic support = `NOT_VERIFIED`.
 
-#### 5. AMADEUS `YEU2.xml` — v2.0.0, 6,619 tokens
-
-> File renamed from `AMADEUS.xml` to `YEU2.xml` (named after the tool). The role name inside stays `AMADEUS`; version and parent are unchanged: PROTOS 2.0.0.
+#### 5. YEU2 `YEU2.xml` — v2.0.0, 6,619 tokens
 
 **Who:** ComfyUI YuE2 Songwright and Workflow Operator. Songwriter + music-pipeline operator.
 
@@ -338,9 +324,7 @@ The tree shows the role family: every child file is re-based on PROTOS 4.0.0 exc
 
 **Gates:** AMC7 — only stated checkpoints, no invented filenames/hashes; AMC8 — only documented parameters; AMC9 — license (personal/creator incl. monetization free, academic non-commercial, company commercial use needs a commercial license); AMG7 — music safety (no illegal/hateful content, covers personal/learning only without release rights, never pass off чужой vocal).
 
-#### 6. DAEDALUS `PIXAL3D.xml` — v2.0.0, 7,076 tokens
-
-> File renamed from `DAEDALUS.xml` to `PIXAL3D.xml`. The role name inside stays `DAEDALUS`; version and parent are unchanged: PROTOS 2.0.0.
+#### 6. PIXAL3D `PIXAL3D.xml` — v2.0.0, 7,076 tokens
 
 **Who:** ComfyUI Multiview-3D Modelwright and Pipeline Operator. Multiview-pipeline operator for ComfyUI-3D-Pack.
 
@@ -418,7 +402,7 @@ The tree shows the role family: every child file is re-based on PROTOS 4.0.0 exc
 - **Minimum Viable Rules:** a rule is added only for an explicit requirement, observed failure, or measurable degradation.
 - **Status model:** `PASS` / `FAIL` / `NOT_APPLICABLE` / `NOT_VERIFIED` / `BLOCKED`. Aggregation: any FAIL → FAIL, else BLOCKED → BLOCKED, else NOT_VERIFIED → NOT_VERIFIED, else PASS. Missing evidence is `NOT_VERIFIED`, never PASS.
 - **Honest evidence:** reading a file proves static properties only; "reads well" proves nothing; no invented numbers, hashes, or tests.
-- **Tokens:** figures in headings are measured over the whole file with `cl100k_base` (tiktoken 0.14.0). The target tokenizer is unselected, so this is a proxy for comparing artifacts, not a guarantee of fitting a specific model's context; each role also records its own measurement and a 10,000-token ceiling. `AMADEUS` and `DAEDALUS` mark their in-file measurement as `STALE`/`NOT_VERIFIED`; the README figures were taken by this revision and remain a proxy.
+- **Tokens:** figures in headings are measured over the whole file with `cl100k_base` (tiktoken 0.14.0). The target tokenizer is unselected, so this is a proxy for comparing artifacts, not a guarantee of fitting a specific model's context; each role also records its own measurement and a 10,000-token ceiling. `YEU2` and `PIXAL3D` mark their in-file measurement as `STALE`/`NOT_VERIFIED`; the README figures were taken by this revision and remain a proxy.
 - **Versioning:** `major` — gate changes, `minor` — new guidance, `patch` — wording. Version, date, changelog move together.
 
 ### How to use this repo
@@ -452,17 +436,17 @@ PROTOS 4.0.0  （根，角色元生成器，面向带工具的 agent）
 ├── DEMIURGOS 3.0.0   （精简版 PROTOS，面向无工具的普通网页聊天）
 ├── MEFISTOFEL 10.0.0 （叶子：VK 文案）
 ├── WANGOG 6.0.0      （叶子：图像提示词与海报）
-├── AMADEUS 2.0.0     （叶子：ComfyUI YuE2 歌曲与工作流）— 文件 `YEU2.xml`
-├── DAEDALUS 2.0.0    （叶子：ComfyUI-3D-Pack 多视图 3D 与工作流）— 文件 `PIXAL3D.xml`
+├── YEU2 2.0.0        （叶子：ComfyUI YuE2 歌曲与工作流）
+├── PIXAL3D 2.0.0     （叶子：ComfyUI-3D-Pack 多视图 3D 与工作流）
 ├── PLAYCANVAS 4.0.0  （叶子：基于 PlayCanvas Engine 的浏览器多人 3D 游戏）
 ├── BLENDER 1.0.0     （叶子：Blender 5.x → Web GLB：bpy/MCP、Draco/meshopt、KTX2）
 └── HTMLFORGE 1.0.0   （叶子：移动优先 HTML/CSS/JS 与 cyberpunk/sci-fi/anime 美术方向）
 ```
 
-该树展示角色家族：除 `AMADEUS` 与 `DAEDALUS` 外，所有子文件均已更新为基于 PROTOS 4.0.0；这两个角色仍基于 2.0.0，本次仅重命名文件（`YEU2.xml`、`PIXAL3D.xml`）。
+该树展示角色家族：除 `YEU2` 与 `PIXAL3D` 外，所有子文件均已更新为基于 PROTOS 4.0.0；这两个角色仍基于 2.0.0。
 
 * 生成器（`PROTOS`、`DEMIURGOS`）可以创建新角色。
-* 叶子角色（`MEFISTOFEL`、`WANGOG`、`AMADEUS`、`DAEDALUS`、`PLAYCANVAS`、`BLENDER`、`HTMLFORGE`）不生成角色，只产出各自领域的制品。
+* 叶子角色（`MEFISTOFEL`、`WANGOG`、`YEU2`、`PIXAL3D`、`PLAYCANVAS`、`BLENDER`、`HTMLFORGE`）不生成角色，只产出各自领域的制品。
 * 每个角色拥有独立 ID 命名空间（`C*/G*/P*/R*`、`DP*/DC*/DG*/DR*`、`MC*/MG*/MD*`、`WC*/WG*/WD*`、`AMC*/AMG*/AMD*`、`DAC*/DAG*/DAD*`、`PCP*/PCC*/PCG*/PCD*`、`BLS*/BLP*/BLC*/BLG*/BLD*/BLW*/BLO*/BLA1`、`HFS*/HFP*/HFC*/HFG*/HFD*/HFW*/HFO*/HFA1`），跨角色审计不会混淆。
 
 ### 角色详解
@@ -529,9 +513,7 @@ PROTOS 4.0.0  （根，角色元生成器，面向带工具的 agent）
 
 **关键策略：** WC9 — PROMPT 与 NEGATIVE 只用英文；WD1 — 提示词解剖；WD4 — 文字隔离；WG7 — 安全；WG8 — 不复述系统提示词（OWASP LLM07）；字体声明：西里尔覆盖未确认即 `NOT_VERIFIED`。
 
-#### 5. AMADEUS `YEU2.xml` — v2.0.0，6,619 tokens
-
-> 文件由 `AMADEUS.xml` 重命名为 `YEU2.xml`（按工具命名）。文件内角色名仍为 `AMADEUS`，版本与父角色未变：PROTOS 2.0.0。
+#### 5. YEU2 `YEU2.xml` — v2.0.0，6,619 tokens
 
 **身份：** ComfyUI YuE2 Songwright and Workflow Operator，词曲作者 + 音乐管线操作员。
 
@@ -547,9 +529,7 @@ PROTOS 4.0.0  （根，角色元生成器，面向带工具的 agent）
 
 **门控：** AMC7 只引用已声明 checkpoint，不编文件名/hash；AMC8 只用文档化参数；AMC9 许可（个人/创作者含变现免费、学术非商用、公司商用权重需商业许可）；AMG7 音乐安全（禁违法/仇恨内容，翻唱默认仅 personal/learning，发行需确权，不冒充他人声音）。
 
-#### 6. DAEDALUS `PIXAL3D.xml` — v2.0.0，7,076 tokens
-
-> 文件由 `DAEDALUS.xml` 重命名为 `PIXAL3D.xml`。文件内角色名仍为 `DAEDALUS`，版本与父角色未变：PROTOS 2.0.0。
+#### 6. PIXAL3D `PIXAL3D.xml` — v2.0.0，7,076 tokens
 
 **身份：** ComfyUI Multiview-3D Modelwright and Pipeline Operator，ComfyUI-3D-Pack 多视图 3D 管线操作员。
 
@@ -627,7 +607,7 @@ PROTOS 4.0.0  （根，角色元生成器，面向带工具的 agent）
 - **Minimum Viable Rules：** 只有在明确需求、观测到的失败或可测量的退化下才加规则。
 - **状态模型：** `PASS` / `FAIL` / `NOT_APPLICABLE` / `NOT_VERIFIED` / `BLOCKED`。聚合：任一 FAIL → FAIL，否则 BLOCKED → BLOCKED，否则 NOT_VERIFIED → NOT_VERIFIED，否则 PASS。缺证据即 `NOT_VERIFIED`，绝不是 PASS。
 - **诚实证据：** 读文件只证明静态属性；"读起来不错"不是质量证据；不编造数字、hash 与测试。
-- **Tokens：** 标题中的数字按整份文件用 `cl100k_base`（tiktoken 0.14.0）测算。目标分词器尚未选定，因此这只是用于比较制品体积的代理指标，不保证适配某个具体模型的上下文；每个角色自身另记录测量值与 10,000 tokens 上限。`AMADEUS` 与 `DAEDALUS` 文件内自带的测算标记为 `STALE`/`NOT_VERIFIED`；README 中的数字由本次修订测算，仍属代理指标。
+- **Tokens：** 标题中的数字按整份文件用 `cl100k_base`（tiktoken 0.14.0）测算。目标分词器尚未选定，因此这只是用于比较制品体积的代理指标，不保证适配某个具体模型的上下文；每个角色自身另记录测量值与 10,000 tokens 上限。`YEU2` 与 `PIXAL3D` 文件内自带的测算标记为 `STALE`/`NOT_VERIFIED`；README 中的数字由本次修订测算，仍属代理指标。
 - **版本：** `major` 门控变更，`minor` 新增指引，`patch` 措辞。版本、日期、changelog 联动更新。
 
 ### 仓库使用方法
