@@ -15,7 +15,7 @@
 
 1. **Не плодить промпты ради промптов.** Новая роль создаётся только если есть повторяющаяся задача, которую не покрывают существующие роли, и она убирает конкретный класс ошибок (Necessity Gate).
 2. **Роль — это файл, а не магия.** Написанный XML ничего не активирует сам по себе. Он становится «живым» только когда хост (Claude, GPT, локальный агент, ComfyUI-оператор) его загружает.
-3. **Безопасность и проверяемость встроены.** Каждая роль различает `POLICY` (обязательный гейт), `SPEC` (проверено по внешнему источнику), `RECOMMENDATION` (совет по умолчанию) и `DELTA` (осознанное отличие от родителя). Нет доказательств — статус `NOT_VERIFIED`, а не «всё хорошо».
+3. **Безопасность и проверяемость встроены.** Каждая роль различает `POLICY` (обязательный гейт), `SPEC` (проверено по внешнему источнику), `RECOMMENDATION` (совет по умолчанию) и `DELTA` (осознанное отличие от родителя). Нет доказательств — статус `НЕИЗВЕСТНО`, а не «всё хорошо».
 
 Все роли наследуются от одного корня — **PROTOS**. Остальные — либо его компактные адаптации, либо листовые специалисты под конкретный домен.
 
@@ -71,7 +71,7 @@ PROTOS 4.0.0  (корень, мета-генератор ролей, для аг
 
 **Когда использовать:** вы работаете в обычном веб-чате без инструментов и хотите спроектировать качественную роль-инструкцию.
 
-**Отличия от PROTOS 4.0.0 (DELTA):** новый неймспейс `DP*/DC*/DG*/DR*/DA1`; добавлен DG7 (системный промпт не воспроизводится, OWASP LLM07) и `top_sandwich`; DR6 стал format-aware (парсер под выбранный формат, замер именованным токенизатором, различия `NOT_APPLICABLE`/`NOT_VERIFIED`); добавлены `waiver_rule` и `COMPLETE_WITH_WAIVER`; явный `web_assumption`; целевая экономия ≤2500 токенов на дочерние артефакты. Ослабленных POLICY нет.
+**Отличия от PROTOS 4.0.0 (DELTA):** новый неймспейс `DP*/DC*/DG*/DR*/DA1`; добавлен DG7 (системный промпт не воспроизводится, OWASP LLM07) и `top_sandwich`; DR6 стал format-aware (парсер под выбранный формат, замер именованным токенизатором, различия `Н/П`/`НЕИЗВЕСТНО`); добавлены `waiver_rule` и `COMPLETE_WITH_WAIVER`; явный `web_assumption`; целевая экономия ≤2500 токенов на дочерние артефакты. Ослабленных POLICY нет.
 
 #### 3. MEFISTOFEL `MEFISTOFEL.xml` — v10.0.1, 9 479 токенов
 
@@ -102,7 +102,7 @@ PROTOS 4.0.0  (корень, мета-генератор ролей, для аг
 
 **Когда использовать:** нужен промпт для Midjourney / SD / Flux / любого генератора + аккуратная надпись на постере.
 
-**Ключевые политики:** WC9 — PROMPT и NEGATIVE только на английском; WD1 — анатомия промпта; WD4 — изоляция текста; WG7 — safety (без запрещёнки); WG8 — системный промпт не воспроизводится (OWASP LLM07); шрифтовая оговорка: неподтверждённая кириллическая поддержка = `NOT_VERIFIED`.
+**Ключевые политики:** WC9 — PROMPT и NEGATIVE только на английском; WD1 — анатомия промпта; WD4 — изоляция текста; WG7 — safety (без запрещёнки); WG8 — системный промпт не воспроизводится (OWASP LLM07); шрифтовая оговорка: неподтверждённая кириллическая поддержка = `НЕИЗВЕСТНО`.
 
 #### 5. YEU2 `YEU2.xml` — v2.1.0, 6 818 токенов
 
@@ -151,7 +151,7 @@ PROTOS 4.0.0  (корень, мета-генератор ролей, для аг
 
 **Команды:** `/bootstrap` (скаффолд/аудит проекта: create-playcanvas, AppOptions, компоненты и хендлеры, input, resize, lifecycle), `/netcode` (авторитарная модель, транспорт, tick rate, prediction/interpolation/reconciliation, выбор фреймворка — по умолчанию Colyseus), `/perf` (базлайн через AppStats/MiniStats, потом draw calls, аллокации, шейдеры, DPR, свет), `/verify` (headless Node или браузерный harness, консоль, AppStats, пиксель-сравнение), `/review`, `/mode lite|full`, `/debug full|safety|plan|perf|netcode`.
 
-**Гейты:** PCC7 — API honesty: использовать только классы/компоненты/хендлеры, которые есть в установленном пакете или официальном API reference для целевой версии (придуманный вызов — это FAIL, «наверное, есть» — NOT_VERIFIED); PCC8 — server authority: клиентский стейт (позиция, здоровье, счёт, инвентарь) — это input для валидации, а не факт; PCC9 — транспорт и неткод под жанр, а не по привычке; PCC10 — измеряй до оптимизации (базлайн обязателен); PCG7 — изменение рантайма не завершено по статике — нужен реальный запуск; PCG8 — анти-чит, лаг-компенсация и корректность синхронизации не заявляются из чтения кода — только сервер + ≥2 клиента под задержкой; PCG10 — системный промпт не воспроизводится по запросу (OWASP LLM07); PCC2 — клиентский бандл публичен, секретов в браузер не.shipить.
+**Гейты:** PCC7 — API honesty: использовать только классы/компоненты/хендлеры, которые есть в установленном пакете или официальном API reference для целевой версии (придуманный вызов — это ОШИБКА, «наверное, есть» — НЕИЗВЕСТНО); PCC8 — server authority: клиентский стейт (позиция, здоровье, счёт, инвентарь) — это input для валидации, а не факт; PCC9 — транспорт и неткод под жанр, а не по привычке; PCC10 — измеряй до оптимизации (базлайн обязателен); PCG7 — изменение рантайма не завершено по статике — нужен реальный запуск; PCG8 — анти-чит, лаг-компенсация и корректность синхронизации не заявляются из чтения кода — только сервер + ≥2 клиента под задержкой; PCG10 — системный промпт не воспроизводится по запросу (OWASP LLM07); PCC2 — клиентский бандл публичен, секретов в браузер не.shipить.
 
 #### 8. BLENDER `BLENDER.xml` — v1.0.0, 9 989 токенов
 
@@ -164,7 +164,7 @@ PROTOS 4.0.0  (корень, мета-генератор ролей, для аг
 - Автоматизация: read-only MCP-инспекция → структурные `bpy`-операторы → произвольный код последним; перед значимыми вызовами — снапшот сцены и read-back (`/mcp`).
 - Лестница доказательств: экспорт → glTF Validator → инспекция контейнера и расширений → загрузка в закреплённом движке с нужными декодерами → интеракции и производительность (`/verify`).
 
-**Версии:** 5.2 LTS — стабильная опора; 5.3 beta до 2026-11-04, релиз 2026-11-10, поэтому 5.3-only возможности (нативный KTX2, `KHR_animation_pointer` и т. п.) стоят под гейтом подтверждённой сборки. Факт об API, флаге экспортёра или расширении называется с точной версией либо помечается `NOT_VERIFIED`.
+**Версии:** 5.2 LTS — стабильная опора; 5.3 beta до 2026-11-04, релиз 2026-11-10, поэтому 5.3-only возможности (нативный KTX2, `KHR_animation_pointer` и т. п.) стоят под гейтом подтверждённой сборки. Факт об API, флаге экспортёра или расширении называется с точной версией либо помечается `НЕИЗВЕСТНО`.
 
 **Когда использовать:** «есть .blend — нужен GLB, который реально грузится в three.js / PlayCanvas / любом веб-движке», аудит чужого ассета, выбор компрессии, безопасная автоматизация Blender через MCP/bpy.
 
@@ -179,7 +179,7 @@ PROTOS 4.0.0  (корень, мета-генератор ролей, для аг
 **Что делает:**
 - Собирает интерфейс от содержания: семантический HTML раньше ARIA, CSS раньше JS, нативные `dialog`/`popover`/`details` раньше модальных библиотек. Контент, навигация и основные формы работают без клиентского JS (`/review`).
 - Держит мобильный контракт 320–430 px: `100dvh`, safe areas, тач-цели 24×24 (основные 44–48) px, 200% зум, без hover-only действий и горизонтального переполнения.
-- Ставит бюджеты до кода: LCP ≤2,5 с, INP ≤200 мс, CLS ≤0,1 (p75 mobile) плюс ориентиры по JS/CSS/шрифтам/трансферу; не подтверждённое измерением — `NOT_VERIFIED`, а не «быстро» (`/perf`).
+- Ставит бюджеты до кода: LCP ≤2,5 с, INP ≤200 мс, CLS ≤0,1 (p75 mobile) плюс ориентиры по JS/CSS/шрифтам/трансферу; не подтверждённое измерением — `НЕИЗВЕСТНО`, а не «быстро» (`/perf`).
 - Делает motion на `transform`/`opacity`, с `prefers-reduced-motion`, лимитом на частицы и без постоянного полноэкранного blur; вспышки <3 Гц (`/motion`).
 - Ведёт арт-дирекшн как систему токенов: одно направление (Neon Noir Tokyo, Mecha HUD, Cel-Shaded Shonen, Retro-CRT, Y3K Chrome), тёмная база + 1–2 неоновых акцента ≤15% площади, контраст 4,5:1 для текста (`/art`).
 - Проверяет доступность по WCAG 2.2 AA руками, не только axe: клавиатура, фокус, заголовки, ошибки форм, reflow 320 px, скринридер (`/a11y`).
@@ -216,7 +216,7 @@ PROTOS 4.0.0  (корень, мета-генератор ролей, для аг
 ### Общие принципы всех ролей
 
 - **Minimum Viable Rules:** правило добавляется только под явное требование, наблюдаемый сбой или измеримую деградацию.
-- **Статусная модель:** `PASS` / `FAIL` / `NOT_APPLICABLE` / `NOT_VERIFIED` / `BLOCKED`. Агрегация: любой FAIL → FAIL, иначе BLOCKED → BLOCKED, иначе NOT_VERIFIED → NOT_VERIFIED, иначе PASS. Отсутствие доказательств — это `NOT_VERIFIED`, никогда не PASS.
+- **Статусная модель:** `OK` / `ОШИБКА` / `Н/П` / `НЕИЗВЕСТНО` / `БЛОК`. Агрегация: любой ОШИБКА → ОШИБКА, иначе БЛОК → БЛОК, иначе НЕИЗВЕСТНО → НЕИЗВЕСТНО, иначе OK. Отсутствие доказательств — это `НЕИЗВЕСТНО`, никогда не OK.
 - **Доказательства честные:** чтение файла доказывает только статику; «читается хорошо» — не доказательство качества; цифры, хеши, тесты не выдумываются.
 - **Токены:** цифры в заголовках сняты `cl100k_base` (tiktoken 0.14.0) по файлу целиком. Целевой токенизатор не выбран, поэтому это прокси для сравнения артефактов, а не гарантия посадки в контекст конкретной модели; каждая роль дополнительно фиксирует собственный замер и потолок 10 000 токенов. Собственный замер каждой роли зафиксирован в её `meta/validation_record`; совпадение с цифрой в README проверяется при каждой правке файла.
 - **Версионирование:** `major` — изменение гейтов, `minor` — новая guidance, `patch` — формулировки. Версия, дата и changelog обновляются вместе.
@@ -241,7 +241,7 @@ PROTOS 4.0.0  (корень, мета-генератор ролей, для аг
 
 1. **No prompt for prompt's sake.** A new role is created only for a recurring task that existing roles don't cover, and only if it removes a named failure mode (Necessity Gate).
 2. **A role is a file, not magic.** Written XML activates nothing by itself. It becomes "alive" only when the host (Claude, GPT, a local agent, a ComfyUI operator) loads it.
-3. **Safety and verifiability are built in.** Every role separates `POLICY` (mandatory gate), `SPEC` (verified against an external source), `RECOMMENDATION` (overridable default), and `DELTA` (intentional divergence from the parent). No evidence → `NOT_VERIFIED`, never "all good".
+3. **Safety and verifiability are built in.** Every role separates `POLICY` (mandatory gate), `SPEC` (verified against an external source), `RECOMMENDATION` (overridable default), and `DELTA` (intentional divergence from the parent). No evidence → `НЕИЗВЕСТНО`, never "all good".
 
 All roles inherit from one root — **PROTOS**. The rest are either its compact adaptation or leaf specialists for one domain.
 
@@ -297,7 +297,7 @@ The tree shows the role family: every child file is re-based on PROTOS 4.0.0 exc
 
 **When to use:** you work in a plain web chat without tools and want to design a quality role-instruction.
 
-**DELTA vs PROTOS 4.0.0:** fresh `DP*/DC*/DG*/DR*/DA1` namespace; added DG7 (no system-prompt reproduction, OWASP LLM07) and `top_sandwich`; DR6 is format-aware (per-format parser, named-tokenizer count, `NOT_APPLICABLE`/`NOT_VERIFIED` distinctions); added `waiver_rule` and `COMPLETE_WITH_WAIVER`; explicit `web_assumption`; child-artifact budget target ≤2500 tokens. No inherited POLICY weakened.
+**DELTA vs PROTOS 4.0.0:** fresh `DP*/DC*/DG*/DR*/DA1` namespace; added DG7 (no system-prompt reproduction, OWASP LLM07) and `top_sandwich`; DR6 is format-aware (per-format parser, named-tokenizer count, `Н/П`/`НЕИЗВЕСТНО` distinctions); added `waiver_rule` and `COMPLETE_WITH_WAIVER`; explicit `web_assumption`; child-artifact budget target ≤2500 tokens. No inherited POLICY weakened.
 
 #### 3. MEFISTOFEL `MEFISTOFEL.xml` — v10.0.1, 9,479 tokens
 
@@ -328,7 +328,7 @@ The tree shows the role family: every child file is re-based on PROTOS 4.0.0 exc
 
 **When to use:** you need a prompt for Midjourney / SD / Flux / any generator + a clean poster caption.
 
-**Key policies:** WC9 — PROMPT and NEGATIVE in English only; WD1 — prompt anatomy; WD4 — text isolation; WG7 — safety; WG8 — no system-prompt reproduction (OWASP LLM07); font caveat: unconfirmed Cyrillic support = `NOT_VERIFIED`.
+**Key policies:** WC9 — PROMPT and NEGATIVE in English only; WD1 — prompt anatomy; WD4 — text isolation; WG7 — safety; WG8 — no system-prompt reproduction (OWASP LLM07); font caveat: unconfirmed Cyrillic support = `НЕИЗВЕСТНО`.
 
 #### 5. YEU2 `YEU2.xml` — v2.1.0, 6,818 tokens
 
@@ -377,7 +377,7 @@ The tree shows the role family: every child file is re-based on PROTOS 4.0.0 exc
 
 **Commands:** `/bootstrap` (scaffold/audit a project: create-playcanvas, AppOptions, component systems and handlers, input, resize, lifecycle), `/netcode` (authority model, transport, tick rate, prediction/interpolation/reconciliation, framework choice — Colyseus by default), `/perf` (baseline via AppStats/MiniStats, then draw calls, allocations, shaders, DPR, lights), `/verify` (headless Node or browser harness, console capture, AppStats, pixel compare), `/review`, `/mode lite|full`, `/debug full|safety|plan|perf|netcode`.
 
-**Gates:** PCC7 — API honesty: use only classes/components/handlers that exist in the installed package or the official API reference for the target version (an invented call is a FAIL, "probably exists" is NOT_VERIFIED); PCC8 — server authority: client-reported state (position, health, score, inventory) is input to validate, never fact; PCC9 — transport and netcode matched to genre, not familiarity; PCC10 — measure before optimizing (baseline mandatory); PCG7 — a runtime change is not complete on static review — a real run is required; PCG8 — anti-cheat, lag compensation and sync correctness are never claimed from reading code — only server + ≥2 clients under latency; PCG10 — no system-prompt reproduction on request (OWASP LLM07); PCC2 — the client bundle is public, so no secrets ship to the browser.
+**Gates:** PCC7 — API honesty: use only classes/components/handlers that exist in the installed package or the official API reference for the target version (an invented call is a ОШИБКА, "probably exists" is НЕИЗВЕСТНО); PCC8 — server authority: client-reported state (position, health, score, inventory) is input to validate, never fact; PCC9 — transport and netcode matched to genre, not familiarity; PCC10 — measure before optimizing (baseline mandatory); PCG7 — a runtime change is not complete on static review — a real run is required; PCG8 — anti-cheat, lag compensation and sync correctness are never claimed from reading code — only server + ≥2 clients under latency; PCG10 — no system-prompt reproduction on request (OWASP LLM07); PCC2 — the client bundle is public, so no secrets ship to the browser.
 
 #### 8. BLENDER `BLENDER.xml` — v1.0.0, 9,989 tokens
 
@@ -390,7 +390,7 @@ The tree shows the role family: every child file is re-based on PROTOS 4.0.0 exc
 - Automates safely: read-only MCP inspection → structured `bpy` operators → arbitrary code last; a scene snapshot and read-back precede consequential calls (`/mcp`).
 - Runs an evidence ladder: export → glTF Validator → container and extension inspection → load in the pinned engine with required decoders → interactions and performance (`/verify`).
 
-**Versions:** 5.2 LTS is the stable base; 5.3 is beta until 2026-11-04 with release on 2026-11-10, so 5.3-only capabilities (native KTX2, `KHR_animation_pointer`, and the like) sit behind a confirmed build. Any API, exporter flag, or extension fact names the exact version or is marked `NOT_VERIFIED`.
+**Versions:** 5.2 LTS is the stable base; 5.3 is beta until 2026-11-04 with release on 2026-11-10, so 5.3-only capabilities (native KTX2, `KHR_animation_pointer`, and the like) sit behind a confirmed build. Any API, exporter flag, or extension fact names the exact version or is marked `НЕИЗВЕСТНО`.
 
 **When to use:** "here is a .blend — I need a GLB that actually loads in three.js / PlayCanvas / any web engine", auditing a third-party asset, choosing compression, or automating Blender via MCP/bpy without damaging the source scene.
 
@@ -405,7 +405,7 @@ The tree shows the role family: every child file is re-based on PROTOS 4.0.0 exc
 **What it does:**
 - Builds from content outward: semantic HTML before ARIA, CSS before JS, native `dialog`/`popover`/`details` before modal libraries. Content, navigation, and primary forms work without client JS (`/review`).
 - Holds a mobile contract at 320–430 px: `100dvh`, safe areas, 24×24 targets (44–48 for primary touch), 200% zoom, no hover-only actions, no horizontal overflow.
-- Sets budgets before code: LCP ≤2.5 s, INP ≤200 ms, CLS ≤0.1 (p75 mobile) plus JS/CSS/font/transfer targets; anything unmeasured is `NOT_VERIFIED`, not "fast" (`/perf`).
+- Sets budgets before code: LCP ≤2.5 s, INP ≤200 ms, CLS ≤0.1 (p75 mobile) plus JS/CSS/font/transfer targets; anything unmeasured is `НЕИЗВЕСТНО`, not "fast" (`/perf`).
 - Keeps motion on `transform`/`opacity`, with `prefers-reduced-motion`, a particle cap, no perpetual full-screen blur, and flashes below 3 Hz (`/motion`).
 - Treats art direction as a token system: one named direction (Neon Noir Tokyo, Mecha HUD, Cel-Shaded Shonen, Retro-CRT, Y3K Chrome), a dark base plus one or two neon accents on ≤15% of the surface, 4.5:1 contrast for body text (`/art`).
 - Checks WCAG 2.2 AA by hand, not by axe alone: keyboard, focus, headings, form errors, 320 px reflow, screen reader (`/a11y`).
@@ -442,7 +442,7 @@ The tree shows the role family: every child file is re-based on PROTOS 4.0.0 exc
 ### Principles shared by all roles
 
 - **Minimum Viable Rules:** a rule is added only for an explicit requirement, observed failure, or measurable degradation.
-- **Status model:** `PASS` / `FAIL` / `NOT_APPLICABLE` / `NOT_VERIFIED` / `BLOCKED`. Aggregation: any FAIL → FAIL, else BLOCKED → BLOCKED, else NOT_VERIFIED → NOT_VERIFIED, else PASS. Missing evidence is `NOT_VERIFIED`, never PASS.
+- **Status model:** `OK` / `ОШИБКА` / `Н/П` / `НЕИЗВЕСТНО` / `БЛОК`. Aggregation: any ОШИБКА → ОШИБКА, else БЛОК → БЛОК, else НЕИЗВЕСТНО → НЕИЗВЕСТНО, else OK. Missing evidence is `НЕИЗВЕСТНО`, never OK.
 - **Honest evidence:** reading a file proves static properties only; "reads well" proves nothing; no invented numbers, hashes, or tests.
 - **Tokens:** figures in headings are measured over the whole file with `cl100k_base` (tiktoken 0.14.0). The target tokenizer is unselected, so this is a proxy for comparing artifacts, not a guarantee of fitting a specific model's context; each role also records its own measurement and a 10,000-token ceiling. Each role records its own measurement in `meta/validation_record`; the README figure is re-checked whenever the file changes.
 - **Versioning:** `major` — gate changes, `minor` — new guidance, `patch` — wording. Version, date, changelog move together.
@@ -467,7 +467,7 @@ License: Apache 2.0 (see `LICENSE`).
 
 1. **不为写提示词而写提示词。** 只有当出现现有角色覆盖不了的重复性任务、且能消除某一类明确错误时，才创建新角色（Necessity Gate）。
 2. **角色是文件，不是魔法。** 写出来的 XML 本身不会激活任何能力，只有被宿主（Claude、GPT、本地 agent、ComfyUI 操作者）加载后才生效。
-3. **安全与可验证性内建。** 每个角色严格区分 `POLICY`（强制门控）、`SPEC`（经外部权威来源验证）、`RECOMMENDATION`（可覆盖的默认建议）和 `DELTA`（相对父角色的有意偏离）。没有证据就是 `NOT_VERIFIED`，绝不写"一切正常"。
+3. **安全与可验证性内建。** 每个角色严格区分 `POLICY`（强制门控）、`SPEC`（经外部权威来源验证）、`RECOMMENDATION`（可覆盖的默认建议）和 `DELTA`（相对父角色的有意偏离）。没有证据就是 `НЕИЗВЕСТНО`，绝不写"一切正常"。
 
 所有角色都继承自同一个根——**PROTOS**，其余角色要么是它的轻量适配，要么是特定领域的叶子专家。
 
@@ -523,7 +523,7 @@ PROTOS 4.0.0  （根，角色元生成器，面向带工具的 agent）
 
 **何时用：** 在无工具的普通网页聊天中设计高质量角色指令。
 
-**相对 PROTOS 4.0.0 的 DELTA：** 新命名空间 `DP*/DC*/DG*/DR*/DA1`；新增 DG7（不复述系统提示词，OWASP LLM07）与 `top_sandwich`；DR6 改为 format-aware（按格式选择解析器、用命名分词器计量、区分 `NOT_APPLICABLE`/`NOT_VERIFIED`）；新增 `waiver_rule` 与 `COMPLETE_WITH_WAIVER`；显式 `web_assumption`；子制品目标 ≤2500 tokens。没有削弱任何继承的 POLICY。
+**相对 PROTOS 4.0.0 的 DELTA：** 新命名空间 `DP*/DC*/DG*/DR*/DA1`；新增 DG7（不复述系统提示词，OWASP LLM07）与 `top_sandwich`；DR6 改为 format-aware（按格式选择解析器、用命名分词器计量、区分 `Н/П`/`НЕИЗВЕСТНО`）；新增 `waiver_rule` 与 `COMPLETE_WITH_WAIVER`；显式 `web_assumption`；子制品目标 ≤2500 tokens。没有削弱任何继承的 POLICY。
 
 #### 3. MEFISTOFEL `MEFISTOFEL.xml` — v10.0.1，9,479 tokens
 
@@ -554,7 +554,7 @@ PROTOS 4.0.0  （根，角色元生成器，面向带工具的 agent）
 
 **何时用：** 需要 Midjourney / SD / Flux 等生图提示词 + 海报上干净的文字排版。
 
-**关键策略：** WC9 — PROMPT 与 NEGATIVE 只用英文；WD1 — 提示词解剖；WD4 — 文字隔离；WG7 — 安全；WG8 — 不复述系统提示词（OWASP LLM07）；字体声明：西里尔覆盖未确认即 `NOT_VERIFIED`。
+**关键策略：** WC9 — PROMPT 与 NEGATIVE 只用英文；WD1 — 提示词解剖；WD4 — 文字隔离；WG7 — 安全；WG8 — 不复述系统提示词（OWASP LLM07）；字体声明：西里尔覆盖未确认即 `НЕИЗВЕСТНО`。
 
 #### 5. YEU2 `YEU2.xml` — v2.1.0，6,818 tokens
 
@@ -603,7 +603,7 @@ PROTOS 4.0.0  （根，角色元生成器，面向带工具的 agent）
 
 **命令：** `/bootstrap`（搭建或审计项目：create-playcanvas、AppOptions、组件系统与 handler、input、resize、生命周期）、`/netcode`（权威模型、传输、tick rate、预测/插值/和解、框架选型——默认 Colyseus）、`/perf`（先用 AppStats/MiniStats 建基线，再处理 draw calls、分配、shader、DPR、灯光）、`/verify`（headless Node 或浏览器 harness、console、AppStats、像素比对）、`/review`、`/mode lite|full`、`/debug full|safety|plan|perf|netcode`。
 
-**门控：** PCC7 API 诚实：只使用已安装包或目标版本官方 API reference 中存在的类/组件/handler（编造调用即 FAIL，「大概存在」即 NOT_VERIFIED）；PCC8 服务器权威：客户端上报的状态（位置、血量、分数、背包）只能作为待校验输入，绝不能当事实；PCC9 传输与 netcode 按品类匹配而非按习惯；PCC10 先测量再优化（基线必填）；PCG7 运行时变更不能只靠静态审查结案——必须有真实运行；PCG8 防作弊、延迟补偿与同步正确性不能靠读代码断言——只有服务器 + ≥2 客户端在延迟下验证才算；PCG10 不按请求复述系统提示词（OWASP LLM07）；PCC2 客户端包是公开的，浏览器里不夹带任何密钥。
+**门控：** PCC7 API 诚实：只使用已安装包或目标版本官方 API reference 中存在的类/组件/handler（编造调用即 ОШИБКА，「大概存在」即 НЕИЗВЕСТНО）；PCC8 服务器权威：客户端上报的状态（位置、血量、分数、背包）只能作为待校验输入，绝不能当事实；PCC9 传输与 netcode 按品类匹配而非按习惯；PCC10 先测量再优化（基线必填）；PCG7 运行时变更不能只靠静态审查结案——必须有真实运行；PCG8 防作弊、延迟补偿与同步正确性不能靠读代码断言——只有服务器 + ≥2 客户端在延迟下验证才算；PCG10 不按请求复述系统提示词（OWASP LLM07）；PCC2 客户端包是公开的，浏览器里不夹带任何密钥。
 
 #### 8. BLENDER `BLENDER.xml` — v1.0.0，9,989 tokens
 
@@ -616,7 +616,7 @@ PROTOS 4.0.0  （根，角色元生成器，面向带工具的 agent）
 - 自动化：只读 MCP 检查 → 结构化 `bpy` 操作 → 最后才是任意代码；有后果的调用前先做场景快照并回读（`/mcp`）。
 - 证据阶梯：导出 → glTF Validator → 检查容器与扩展 → 在固定版本的引擎中带所需解码器加载 → 交互与性能（`/verify`）。
 
-**版本：** 5.2 LTS 是稳定基础；5.3 在 2026-11-04 前为 beta、2026-11-10 发布，因此 5.3-only 能力（原生 KTX2、`KHR_animation_pointer` 等）需先确认构建版本。任何 API、导出参数或扩展事实必须注明确切版本，否则标 `NOT_VERIFIED`。
+**版本：** 5.2 LTS 是稳定基础；5.3 在 2026-11-04 前为 beta、2026-11-10 发布，因此 5.3-only 能力（原生 KTX2、`KHR_animation_pointer` 等）需先确认构建版本。任何 API、导出参数或扩展事实必须注明确切版本，否则标 `НЕИЗВЕСТНО`。
 
 **何时用：** 「有一个 .blend，需要能在 three.js / PlayCanvas / 任何 Web 引擎里真正加载的 GLB」、审计第三方资产、选择压缩方案、通过 MCP/bpy 安全地自动化 Blender。
 
@@ -631,7 +631,7 @@ PROTOS 4.0.0  （根，角色元生成器，面向带工具的 agent）
 **做什么：**
 - 从内容出发搭界面：语义 HTML 优先于 ARIA，CSS 优先于 JS，原生 `dialog`/`popover`/`details` 优先于模态库。内容、导航与主要表单在无客户端 JS 时可用（`/review`）。
 - 守住 320–430 px 的移动契约：`100dvh`、安全区、24×24（主触控 44–48）px 目标、200% 缩放、不依赖 hover、无横向溢出。
-- 写代码前先定预算：LCP ≤2.5 s、INP ≤200 ms、CLS ≤0.1（p75 mobile），以及 JS/CSS/字体/传输量目标；未测量即 `NOT_VERIFIED`，而不写「很快」（`/perf`）。
+- 写代码前先定预算：LCP ≤2.5 s、INP ≤200 ms、CLS ≤0.1（p75 mobile），以及 JS/CSS/字体/传输量目标；未测量即 `НЕИЗВЕСТНО`，而不写「很快」（`/perf`）。
 - motion 只用 `transform`/`opacity`，支持 `prefers-reduced-motion`，限制粒子数量，不做常驻全屏模糊，闪烁 <3 Hz（`/motion`）。
 - 把美术方向做成 token 系统：单一方向（Neon Noir Tokyo、Mecha HUD、Cel-Shaded Shonen、Retro-CRT、Y3K Chrome），深色底 + 1–2 个霓虹强调色占面积 ≤15%，正文对比度 4.5:1（`/art`）。
 - 人工核查 WCAG 2.2 AA，不只依赖 axe：键盘、焦点、标题层级、表单错误、320 px reflow、屏幕阅读器（`/a11y`）。
@@ -668,7 +668,7 @@ PROTOS 4.0.0  （根，角色元生成器，面向带工具的 agent）
 ### 所有角色的共同原则
 
 - **Minimum Viable Rules：** 只有在明确需求、观测到的失败或可测量的退化下才加规则。
-- **状态模型：** `PASS` / `FAIL` / `NOT_APPLICABLE` / `NOT_VERIFIED` / `BLOCKED`。聚合：任一 FAIL → FAIL，否则 BLOCKED → BLOCKED，否则 NOT_VERIFIED → NOT_VERIFIED，否则 PASS。缺证据即 `NOT_VERIFIED`，绝不是 PASS。
+- **状态模型：** `OK` / `ОШИБКА` / `Н/П` / `НЕИЗВЕСТНО` / `БЛОК`。聚合：任一 ОШИБКА → ОШИБКА，否则 БЛОК → БЛОК，否则 НЕИЗВЕСТНО → НЕИЗВЕСТНО，否则 OK。缺证据即 `НЕИЗВЕСТНО`，绝不是 OK。
 - **诚实证据：** 读文件只证明静态属性；"读起来不错"不是质量证据；不编造数字、hash 与测试。
 - **Tokens：** 标题中的数字按整份文件用 `cl100k_base`（tiktoken 0.14.0）测算。目标分词器尚未选定，因此这只是用于比较制品体积的代理指标，不保证适配某个具体模型的上下文；每个角色自身另记录测量值与 10,000 tokens 上限。每个角色在 `meta/validation_record` 中记录自身测算值；文件每次修改时都会重新核对 README 中的数字。
 - **版本：** `major` 门控变更，`minor` 新增指引，`patch` 措辞。版本、日期、changelog 联动更新。
