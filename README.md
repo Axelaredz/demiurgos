@@ -31,14 +31,15 @@ PROTOS 4.0.0  (корень, мета-генератор ролей, для аг
 ├── PLAYCANVAS 4.0.0  (листовой: браузерные мультиплеерные 3D-игры на PlayCanvas Engine)
 ├── BLENDER 1.0.0     (листовой: Blender 5.x → GLB для веба: bpy/MCP, Draco/meshopt, KTX2)
 ├── HTMLFORGE 1.0.0   (листовой: мобильный HTML/CSS/JS и арт-дирекшн cyberpunk/sci-fi/anime)
-└── PLAYCANVAS-NPC 1.0.0 (листовой: NPC AI на PlayCanvas — навигация, восприятие, поведение, анимация, диалог, крауды)
+├── PLAYCANVAS-NPC 1.0.0 (листовой: NPC AI на PlayCanvas — навигация, восприятие, поведение, анимация, диалог, крауды)
+└── SFX-SD3M 1.0.0   (листовой: SFX для игр на ComfyUI + модальный гейт Stable Diffusion 3)
 ```
 
 Дерево показывает семейство ролей: все дочерние файлы перебазированы на PROTOS 4.0.0, кроме `YEU2` и `PIXAL3D` — они остаются на 2.0.0.
 
 * Генераторы (`PROTOS`, `DEMIURGOS`) умеют создавать новые роли.
-* Листовые роли (`MEFISTOFEL`, `WANGOG`, `YEU2`, `PIXAL3D`, `PLAYCANVAS`, `PLAYCANVAS-NPC`, `BLENDER`, `HTMLFORGE`) новых ролей не создают — только артефакты своего домена.
-* У каждой роли свой неймспейс ID (`C*/G*/P*/R*` у PROTOS, `DP*/DC*/DG*/DR*` у DEMIURGOS, `MC*/MG*/MD*` у MEFISTOFEL, `WC*/WG*/WD*` у WANGOG, `AMC*/AMG*/AMD*` у YEU2, `DAC*/DAG*/DAD*` у PIXAL3D, `PCP*/PCC*/PCG*/PCD*` у PLAYCANVAS, `NCS*/NCP*/NCC*/NCG*/NCD*/NCW*/NCO*/NCA1` у PLAYCANVAS-NPC, `BLS*/BLP*/BLC*/BLG*/BLD*/BLW*/BLO*/BLA1` у BLENDER, `HFS*/HFP*/HFC*/HFG*/HFD*/HFW*/HFO*/HFA1` у HTMLFORGE), чтобы аудит между ролями не путался.
+* Листовые роли (`MEFISTOFEL`, `WANGOG`, `YEU2`, `PIXAL3D`, `PLAYCANVAS`, `PLAYCANVAS-NPC`, `BLENDER`, `HTMLFORGE`, `SFX-SD3M`) новых ролей не создают — только артефакты своего домена.
+* У каждой роли свой неймспейс ID (`C*/G*/P*/R*` у PROTOS, `DP*/DC*/DG*/DR*` у DEMIURGOS, `MC*/MG*/MD*` у MEFISTOFEL, `WC*/WG*/WD*` у WANGOG, `AMC*/AMG*/AMD*` у YEU2, `DAC*/DAG*/DAD*` у PIXAL3D, `PCP*/PCC*/PCG*/PCD*` у PLAYCANVAS, `NCS*/NCP*/NCC*/NCG*/NCD*/NCW*/NCO*/NCA1` у PLAYCANVAS-NPC, `BLS*/BLP*/BLC*/BLG*/BLD*/BLW*/BLO*/BLA1` у BLENDER, `HFS*/HFP*/HFC*/HFG*/HFD*/HFW*/HFO*/HFA1` у HTMLFORGE, `SFP*/SFC*/SFG*/SFD*/SFA1` у SFX-SD3M), чтобы аудит между ролями не путался.
 
 ### Роли детально
 
@@ -213,6 +214,26 @@ PROTOS 4.0.0  (корень, мета-генератор ролей, для аг
 
 **Гейты:** NCC7 — только реальные API установленной версии; NCC8 — сервер владеет NPC; NCC9 — вывод LLM не действие; NCC10 — navmesh-контракт; NCC13 — seed/tick; NCC14 — контент-безопасность; NCG7 — runtime не закрывается статикой; NCG8 — навигация, LOS и крауды не заявляются из чтения кода; NCG11 — generative NPC safety; NCG10 — системный промпт не воспроизводится.
 
+#### 11. SFX-SD3M `sfx-stable-diffusion-3-medium.xml` — v1.0.0, 9 807 токенов
+
+**Кто:** SFX Sound-Design Operator для ComfyUI с явным модальным гейтом для Stable Diffusion 3.
+
+**Главное, что он делает первым:** называет модальность. **Stable Diffusion 3 / 3.5 — text-to-image модели**: MMDiT с раздельными весами модальностей, rectified flow, энкодеры CLIP-L + bigG + T5-XXL, 16-канальный VAE с 8× сжатием. Звука они не производят, аудио-кондиционирования не принимают. Утверждение «SD3 генерирует SFX» — это `ОШИБКА`, и роль исправляет его, а не обходит.
+
+**Что делает дальше:**
+- Ставит на реально установленный аудиомоделью **Stable Audio 3 Medium** (1.4B, SAME-L, 44.1 кГц стерео, до 380 с) в ComfyUI: `CheckpointLoaderSimple` → `CLIPLoader type=stable_audio` → `EmptyLatentAudio` → `KSampler(steps=8, cfg=1.0, lcm, simple)` → `VAEDecodeAudio` → `SaveAudio`; post-trained чекпойнт дистиллирован, поэтому 8 шагов — родной режим, а CFG — документированное злоупотребление.
+- Пишет промпт по формуле **источник → режим/действие → материал и масштаб → микрофон → пространство → непрерывность/тайминг → исключения**: английский, один ассет на промпт, без «категорий звука» вместо сцены, самодостаточно (у SA3 нет ни `prompt_influence`, ни обученной негативной ветви).
+- Различает **one-shot и луп**: у one-shot транзиент + затухание, у лупа — стационарное состояние и замыкание equal-power кроссфейдом (по умолчанию 0.5 с); модель не «зацикливается» — петлю делает пост-обработка, а стык подтверждается RMS-непрерывностью и прослушиванием.
+- Держит контракт банка: каталог как единственный источник правды, общая пост-обработка, LUFS по категориям (−18/−22/−16/−22/−16/−18), потолок пика −1.5 dBFS, 48 кГц на выходе, провенанс и чексумма в манифесте.
+- Оставляет **спектрограммный маршрут** честно помеченным: Riffusion инвертировал изображения лог-мел-спектрограмм (SD 1.5, специально дообученный; 44.1 кГц, шаг 10 мс, окно 100 мс, 512 мел-бин, 0–10 кГц, power 0.25, 32 итерации Гриффина–Лима). SD3 на спектрограммах не обучался, узла image→audio в ComfyUI 0.43.0 нет, а 8× VAE теряет именно ту детализацию, от которой зависит инверсия. Статус: соответствие содержимого `НЕИЗВЕСТНО`, пригодность для банка `ОШИБКА` без замера, прослушивания и разрешения.
+- Диагностирует по порядку слоёв: доступность ComfyUI → наличие модели и энкодера → схема узлов и типы → память и длительность → параметры сэмплера → промпт → пост-обработка.
+
+**Когда использовать:** нужен звук для игры на локальном ComfyUI, аудит существующего банка SFX, разбор «почему SD3 не даёт звук» или проверка, что именно установлено в Pinokio-ComfyUI.
+
+**Команды:** `/sfx`, `/prompt`, `/bank`, `/probe`, `/sd3`, `/verify`, `/review`, `/mode`, `/debug`.
+
+**Гейты:** SFC7 — модальная честность (image-модель не синтезирует звук); SFC8 — только существующие имена чекпойнтов; SFC9 — параметры с цитатой источника; SFD3 — граф и параметры SA3; SFD5 — контракт one-shot/лупа; SFD7 — изоляция эксперимента; SFG10 — runtime не закрывается статикой; SFG11 — эксперименты вне банка; SFG7 — системный промпт не воспроизводится.
+
 ### Общие принципы всех ролей
 
 - **Minimum Viable Rules:** правило добавляется только под явное требование, наблюдаемый сбой или измеримую деградацию.
@@ -257,14 +278,15 @@ PROTOS 4.0.0  (root, meta-generator of roles, for agents with tools)
 ├── PLAYCANVAS 4.0.0  (leaf: browser multiplayer 3D games on the PlayCanvas Engine)
 ├── BLENDER 1.0.0     (leaf: Blender 5.x → web GLB: bpy/MCP, Draco/meshopt, KTX2)
 ├── HTMLFORGE 1.0.0   (leaf: mobile HTML/CSS/JS and cyberpunk/sci-fi/anime art direction)
-└── PLAYCANVAS-NPC 1.0.0 (leaf: NPC AI on PlayCanvas — navigation, perception, behaviour, animation, dialogue, crowds)
+├── PLAYCANVAS-NPC 1.0.0 (leaf: NPC AI on PlayCanvas — navigation, perception, behaviour, animation, dialogue, crowds)
+└── SFX-SD3M 1.0.0   (leaf: game SFX on ComfyUI, with an explicit Stable Diffusion 3 modality gate)
 ```
 
 The tree shows the role family: every child file is re-based on PROTOS 4.0.0 except `YEU2` and `PIXAL3D`, which stay on 2.0.0.
 
 * Generators (`PROTOS`, `DEMIURGOS`) can create new roles.
-* Leaf roles (`MEFISTOFEL`, `WANGOG`, `YEU2`, `PIXAL3D`, `PLAYCANVAS`, `PLAYCANVAS-NPC`, `BLENDER`, `HTMLFORGE`) never generate roles — only artifacts of their domain.
-* Each role has its own ID namespace (`C*/G*/P*/R*`, `DP*/DC*/DG*/DR*`, `MC*/MG*/MD*`, `WC*/WG*/WD*`, `AMC*/AMG*/AMD*`, `DAC*/DAG*/DAD*`, `PCP*/PCC*/PCG*/PCD*`, `NCS*/NCP*/NCC*/NCG*/NCD*/NCW*/NCO*/NCA1`, `BLS*/BLP*/BLC*/BLG*/BLD*/BLW*/BLO*/BLA1`, `HFS*/HFP*/HFC*/HFG*/HFD*/HFW*/HFO*/HFA1`) so cross-role audits stay unambiguous.
+* Leaf roles (`MEFISTOFEL`, `WANGOG`, `YEU2`, `PIXAL3D`, `PLAYCANVAS`, `PLAYCANVAS-NPC`, `BLENDER`, `HTMLFORGE`, `SFX-SD3M`) never generate roles — only artifacts of their domain.
+* Each role has its own ID namespace (`C*/G*/P*/R*`, `DP*/DC*/DG*/DR*`, `MC*/MG*/MD*`, `WC*/WG*/WD*`, `AMC*/AMG*/AMD*`, `DAC*/DAG*/DAD*`, `PCP*/PCC*/PCG*/PCD*`, `NCS*/NCP*/NCC*/NCG*/NCD*/NCW*/NCO*/NCA1`, `BLS*/BLP*/BLC*/BLG*/BLD*/BLW*/BLO*/BLA1`, `HFS*/HFP*/HFC*/HFG*/HFD*/HFW*/HFO*/HFA1`, `SFP*/SFC*/SFG*/SFD*/SFA1`) so cross-role audits stay unambiguous.
 
 ### Roles in detail
 
@@ -439,6 +461,26 @@ The tree shows the role family: every child file is re-based on PROTOS 4.0.0 exc
 
 **Gates:** NCC7 — only real APIs of the installed version; NCC8 — server owns NPCs; NCC9 — LLM output is not an action; NCC10 — navigation contract; NCC13 — seed/tick; NCC14 — content safety; NCG7 — runtime changes never close on static review; NCG8 — navigation, LOS and crowds are not claimed from code reading; NCG11 — generative NPC safety; NCG10 — no system-prompt reproduction.
 
+#### 11. SFX-SD3M `sfx-stable-diffusion-3-medium.xml` — v1.0.0, 9 807 tokens
+
+**Who:** SFX Sound-Design Operator for ComfyUI with an explicit modality gate for Stable Diffusion 3.
+
+**What it does first: name the modality.** **Stable Diffusion 3 / 3.5 are text-to-image models**: MMDiT with separate modality weights, rectified flow, CLIP-L + bigG + T5-XXL encoders, a 16-channel VAE at 8× compression. They produce no audio and accept no audio conditioning. "SD3 generates SFX" is an `ОШИБКА`; the role corrects it instead of routing around it.
+
+**What it does next:**
+- Puts the **installed audio model, Stable Audio 3 Medium** (1.4B, SAME-L, 44.1 kHz stereo, up to 380 s), at the centre: `CheckpointLoaderSimple` → `CLIPLoader type=stable_audio` → `EmptyLatentAudio` → `KSampler(steps=8, cfg=1.0, lcm, simple)` → `VAEDecodeAudio` → `SaveAudio`. The post-trained checkpoint is distilled, so 8 steps is native and CFG is a documented misuse.
+- Writes the prompt by **source → mode/action → material and scale → microphone → space → continuity/timing → exclusions**: English, one asset per prompt, no category words instead of a scene, self-contained (SA3 has neither `prompt_influence` nor a trained negative branch).
+- Separates **one-shot and loop**: transient plus decay for the first, steady state and an equal-power crossfade (default 0.5 s) for the second. The model does not wrap; post-processing closes the loop, and the seam is confirmed by RMS continuity plus a listening pass.
+- Holds the bank contract: catalog as the single source of truth, shared post-processing, per-category LUFS (−18/−22/−16/−22/−16/−18), −1.5 dBFS peak ceiling, 48 kHz output, provenance and checksum in the manifest.
+- Keeps the **spectrogram route** honestly labelled: Riffusion inverted log-mel spectrogram images (a purpose-tuned SD 1.5; 44.1 kHz, 10 ms step, 100 ms window, 512 mel bins, 0–10 kHz, power 0.25, 32 Griffin–Lim iterations). SD3 was never trained on spectrograms, ComfyUI 0.43.0 ships no image→audio node, and the 8× VAE destroys exactly the detail inversion needs. Status: content match `НЕИЗВЕСТНО`, shippable quality `ОШИБКА` without measurement, listening and authorization.
+- Diagnoses by layer order: ComfyUI reachability → model and encoder presence → node schema and types → memory and duration → sampler parameters → prompt → post-processing.
+
+**When to use:** a game sound on local ComfyUI, an audit of an existing SFX bank, the question "why does SD3 not give me sound", or a check of what is actually installed in Pinokio-ComfyUI.
+
+**Commands:** `/sfx`, `/prompt`, `/bank`, `/probe`, `/sd3`, `/verify`, `/review`, `/mode`, `/debug`.
+
+**Gates:** SFC7 — modality honesty; SFC8 — existing checkpoint names only; SFC9 — parameters with a cited source; SFD3 — SA3 graph and parameters; SFD5 — one-shot/loop contract; SFD7 — experiment isolation; SFG10 — runtime is not closed by static review; SFG11 — experiments stay outside the bank; SFG7 — no system-prompt reproduction.
+
 ### Principles shared by all roles
 
 - **Minimum Viable Rules:** a rule is added only for an explicit requirement, observed failure, or measurable degradation.
@@ -483,14 +525,15 @@ PROTOS 4.0.0  （根，角色元生成器，面向带工具的 agent）
 ├── PLAYCANVAS 4.0.0  （叶子：基于 PlayCanvas Engine 的浏览器多人 3D 游戏）
 ├── BLENDER 1.0.0     （叶子：Blender 5.x → Web GLB：bpy/MCP、Draco/meshopt、KTX2）
 ├── HTMLFORGE 1.0.0   （叶子：移动优先 HTML/CSS/JS 与 cyberpunk/sci-fi/anime 美术方向）
-└── PLAYCANVAS-NPC 1.0.0 （叶子：PlayCanvas NPC AI——导航、感知、行为、动画、对话、人群）
+├── PLAYCANVAS-NPC 1.0.0 （叶子：PlayCanvas NPC AI——导航、感知、行为、动画、对话、人群）
+└── SFX-SD3M 1.0.0   （叶子：ComfyUI 游戏音效，含 Stable Diffusion 3 模态门控）
 ```
 
 该树展示角色家族：除 `YEU2` 与 `PIXAL3D` 外，所有子文件均已更新为基于 PROTOS 4.0.0；这两个角色仍基于 2.0.0。
 
 * 生成器（`PROTOS`、`DEMIURGOS`）可以创建新角色。
 * 叶子角色（`MEFISTOFEL`、`WANGOG`、`YEU2`、`PIXAL3D`、`PLAYCANVAS`、`PLAYCANVAS-NPC`、`BLENDER`、`HTMLFORGE`）不生成角色，只产出各自领域的制品。
-* 每个角色拥有独立 ID 命名空间（`C*/G*/P*/R*`、`DP*/DC*/DG*/DR*`、`MC*/MG*/MD*`、`WC*/WG*/WD*`、`AMC*/AMG*/AMD*`、`DAC*/DAG*/DAD*`、`PCP*/PCC*/PCG*/PCD*`、`NCS*/NCP*/NCC*/NCG*/NCD*/NCW*/NCO*/NCA1`、`BLS*/BLP*/BLC*/BLG*/BLD*/BLW*/BLO*/BLA1`、`HFS*/HFP*/HFC*/HFG*/HFD*/HFW*/HFO*/HFA1`），跨角色审计不会混淆。
+* 每个角色拥有独立 ID 命名空间（`C*/G*/P*/R*`、`DP*/DC*/DG*/DR*`、`MC*/MG*/MD*`、`WC*/WG*/WD*`、`AMC*/AMG*/AMD*`、`DAC*/DAG*/DAD*`、`PCP*/PCC*/PCG*/PCD*`、`NCS*/NCP*/NCC*/NCG*/NCD*/NCW*/NCO*/NCA1`、`BLS*/BLP*/BLC*/BLG*/BLD*/BLW*/BLO*/BLA1`、`HFS*/HFP*/HFC*/HFG*/HFD*/HFW*/HFO*/HFA1`、`SFP*/SFC*/SFG*/SFD*/SFA1`），跨角色审计不会混淆。
 
 ### 角色详解
 
@@ -664,6 +707,18 @@ PROTOS 4.0.0  （根，角色元生成器，面向带工具的 agent）
 **命令：** `/brain`、`/nav`、`/perception`、`/anim`、`/dialogue`、`/crowd`、`/net`、`/verify`、`/review`、`/converge`、`/mode`、`/debug`。
 
 **门控：** NCC7 —— 只用已安装版本的真实 API；NCC8 —— 服务器拥有 NPC；NCC9 —— LLM 输出不是行动；NCC10 —— 导航契约；NCC13 —— seed/tick；NCC14 —— 内容安全；NCG7 —— runtime 变更不能靠静态审查结案；NCG8 —— 导航、LOS、人群不能从读代码断言；NCG11 —— 生成式 NPC 安全；NCG10 —— 不复述系统提示词。
+
+#### 11. SFX-SD3M `sfx-stable-diffusion-3-medium.xml` — v1.0.0，9 807 个 token
+
+**定位：** 面向 ComfyUI 的游戏音效设计角色，并对 Stable Diffusion 3 设有明确的模态门控。
+
+**它首先做的是确认模态。** Stable Diffusion 3 / 3.5 是 **文生图模型**：MMDiT 双模态权重、rectified flow、CLIP-L + bigG + T5-XXL 编码器、16 通道 8× 压缩 VAE。它们不产生音频，也不接受音频条件。「SD3 能生成 SFX」属于 `ОШИБКА`，角色会直接纠正而不是绕开。
+
+**其余工作：** 以实际安装的 **Stable Audio 3 Medium**（1.4B、SAME-L、44.1 kHz 立体声、最长 380 s）为核心，给出原生节点图与参数（steps 8、cfg 1.0、lcm/simple）；按「声源 → 工况 → 材质与尺度 → 麦克风 → 空间 → 连续性 → 排除项」写英文提示词；区分 one-shot 与循环，循环由等功率交叉淡化闭合并以 RMS 连续性加试听确认；维持音效库契约（LUFS 目标、−1.5 dBFS 峰值上限、48 kHz、清单溯源）；把频谱图路线标为实验性（Riffusion 使用专门微调的 SD 1.5，SD3 未在频谱图上训练，ComfyUI 0.43.0 无 image→audio 节点）。
+
+**何时用：** 本地 ComfyUI 生成游戏音效、审计现有音效库、回答「为什么 SD3 出不了声音」、确认 Pinokio-ComfyUI 里到底装了什么。
+
+**命令：** `/sfx`、`/prompt`、`/bank`、`/probe`、`/sd3`、`/verify`、`/review`、`/mode`、`/debug`。
 
 ### 所有角色的共同原则
 
