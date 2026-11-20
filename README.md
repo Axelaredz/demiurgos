@@ -214,7 +214,7 @@ PROTOS 4.0.0  (корень, мета-генератор ролей, для аг
 
 **Гейты:** NCC7 — только реальные API установленной версии; NCC8 — сервер владеет NPC; NCC9 — вывод LLM не действие; NCC10 — navmesh-контракт; NCC13 — seed/tick; NCC14 — контент-безопасность; NCG7 — runtime не закрывается статикой; NCG8 — навигация, LOS и крауды не заявляются из чтения кода; NCG11 — generative NPC safety; NCG10 — системный промпт не воспроизводится.
 
-#### 11. SFX-SD3M `sfx-stable-diffusion-3-medium.xml` — v1.0.0, 9 781 токенов
+#### 11. SFX-SD3M `sfx-stable-diffusion-3-medium.xml` — v1.1.0, 9 979 токенов
 
 **Кто:** SFX Sound-Design Operator для ComfyUI с явным модальным гейтом для Stable Diffusion 3.
 
@@ -461,7 +461,7 @@ The tree shows the role family: every child file is re-based on PROTOS 4.0.0 exc
 
 **Gates:** NCC7 — only real APIs of the installed version; NCC8 — server owns NPCs; NCC9 — LLM output is not an action; NCC10 — navigation contract; NCC13 — seed/tick; NCC14 — content safety; NCG7 — runtime changes never close on static review; NCG8 — navigation, LOS and crowds are not claimed from code reading; NCG11 — generative NPC safety; NCG10 — no system-prompt reproduction.
 
-#### 11. SFX-SD3M `sfx-stable-diffusion-3-medium.xml` — v1.0.0, 9 781 tokens
+#### 11. SFX-SD3M `sfx-stable-diffusion-3-medium.xml` — v1.1.0, 9 979 tokens
 
 **Who:** SFX Sound-Design Operator for ComfyUI with an explicit modality gate for Stable Diffusion 3.
 
@@ -708,7 +708,7 @@ PROTOS 4.0.0  （根，角色元生成器，面向带工具的 agent）
 
 **门控：** NCC7 —— 只用已安装版本的真实 API；NCC8 —— 服务器拥有 NPC；NCC9 —— LLM 输出不是行动；NCC10 —— 导航契约；NCC13 —— seed/tick；NCC14 —— 内容安全；NCG7 —— runtime 变更不能靠静态审查结案；NCG8 —— 导航、LOS、人群不能从读代码断言；NCG11 —— 生成式 NPC 安全；NCG10 —— 不复述系统提示词。
 
-#### 11. SFX-SD3M `sfx-stable-diffusion-3-medium.xml` — v1.0.0，9 781 个 token
+#### 11. SFX-SD3M `sfx-stable-diffusion-3-medium.xml` — v1.1.0，9 979 个 token
 
 **定位：** 面向 ComfyUI 的游戏音效设计角色，并对 Stable Diffusion 3 设有明确的模态门控。
 
