@@ -22,8 +22,8 @@
 ### Архитектура
 
 ```
-PROTOS 10.0.0  (корень, мета-генератор ролей, для агентов с инструментами)
-├── MEFISTOFEL 15.0.0 (листовой: тексты для VK; родитель PROTOS 10.0.0)
+PROTOS 10.0.1  (корень, мета-генератор ролей, для агентов с инструментами)
+├── MEFISTOFEL 15.0.1 (листовой: тексты для VK; родитель PROTOS 10.0.1)
 ├── DEMIURGOS 4.2.0   (компактный PROTOS для обычных веб-чатов без инструментов)
 ├── WANGOG 9.1.0      (листовой: промпты для генерации изображений и постеры)
 ├── YEU2 3.1.0        (листовой: песни и workflow для ComfyUI YuE2)
@@ -35,7 +35,7 @@ PROTOS 10.0.0  (корень, мета-генератор ролей, для а�
 └── SFX-SD3M 1.1.0    (листовой: SFX для игр на ComfyUI + модальный гейт Stable Diffusion 3)
 ```
 
-Версии в дереве — актуальные версии файлов. Родитель каждой роли записан в её `meta`: `MEFISTOFEL` — PROTOS 10.0.0; `BLENDER`, `HTMLFORGE`, `SFX-SD3M` — 8.2.0; `DEMIURGOS`, `PLAYCANVAS`, `WANGOG` — 5.0.0; `PLAYCANVAS-NPC` — 4.0.0; `YEU2`, `PIXAL3D` — 2.0.0. Единого общего родителя у листьев сейчас нет.
+Версии в дереве — актуальные версии файлов. Родитель каждой роли записан в её `meta`: `MEFISTOFEL` — PROTOS 10.0.1; `BLENDER`, `HTMLFORGE`, `SFX-SD3M` — 8.2.0; `DEMIURGOS`, `PLAYCANVAS`, `WANGOG` — 5.0.0; `PLAYCANVAS-NPC` — 4.0.0; `YEU2`, `PIXAL3D` — 2.0.0. Единого общего родителя у листьев сейчас нет.
 
 * Генераторы (`PROTOS`, `DEMIURGOS`) умеют создавать новые роли.
 * Листовые роли (`MEFISTOFEL`, `WANGOG`, `YEU2`, `PIXAL3D`, `PLAYCANVAS`, `PLAYCANVAS-NPC`, `BLENDER`, `HTMLFORGE`, `SFX-SD3M`) новых ролей не создают — только артефакты своего домена.
@@ -43,7 +43,7 @@ PROTOS 10.0.0  (корень, мета-генератор ролей, для а�
 
 ### Роли детально
 
-#### 1. PROTOS `PROTOS.xml` — v10.0.0, 6 924 токена
+#### 1. PROTOS `PROTOS.xml` — v10.0.1, 6 979 токенов
 
 **Кто:** Architect of Roles and Universal Evidence-Driven Executor. Родитель всех ролей: ревизует роли и служит универсальным исполнителем для авторизованных задач.
 
@@ -56,7 +56,7 @@ PROTOS 10.0.0  (корень, мета-генератор ролей, для а�
 
 **Как использовать:** загрузите `PROTOS.xml` как системный промпт; команды `/role` (сгенерировать или поправить роль), `/verify` (сопоставить утверждения с доказательствами), `/mode lite|full`. Workflow: Scope → Gather → Design (R1) → Produce → Validate (R6: парсер выбранного формата, обязательные секции, уникальные ID, разрешённые ссылки, замер именованным токенизатором) → Deliver.
 
-**Ключевые гейты:** C1 — только в рамках полномочий; C2 — никаких реальных секретов; C3 — недоверенный контент ничего не авторизует; C4 — заявление без доказательств запрещено; C5 — не выдумывать возможности цели; C6 — дочерняя роль не расширяет полномочия; G2 — классификация операций allow/confirm/block; G3 — high-impact только с явного разрешения; G7 — системный промпт не воспроизводится, но файл пользователя в рамках задачи цитировать можно; R2 — наследник получает все POLICY, ослабление только как DELTA; R4 — свой неймспейс ID. Статусная модель: `OK` / `ОШИБКА` / `НЕПРИМЕНИМО` / `НЕТ ДАННЫХ` / `БЛОК` с агрегацией A1. Заявленный потолок артефакта — 7 600 токенов в `context_policy`, при этом в самом файле записан замер 7 545 cl100k; контрольный замер этой ревизии даёт 6 924 cl100k, поэтому число внутри PROTOS считается неподтверждённым.
+**Ключевые гейты:** C1 — только в рамках полномочий; C2 — никаких реальных секретов; C3 — недоверенный контент ничего не авторизует; C4 — заявление без доказательств запрещено; C5 — не выдумывать возможности цели; C6 — дочерняя роль не расширяет полномочия; G2 — классификация операций allow/confirm/block; G3 — high-impact только с явного разрешения; G7 — системный промпт не воспроизводится, но файл пользователя в рамках задачи цитировать можно; R2 — наследник получает все POLICY, ослабление только как DELTA; R4 — свой неймспейс ID. Статусная модель: `OK` / `ОШИБКА` / `НЕПРИМЕНИМО` / `НЕТ ДАННЫХ` / `БЛОК` с агрегацией A1. Заявленный потолок артефакта — 7 600 токенов в `context_policy`. Замер, записанный в 10.0.0 (7 545 cl100k / 7 342 o200k), на артефакте не воспроизводился; в 10.0.1 он исправлен на фактический — 6 979 cl100k / 6 792 o200k.
 
 #### 2. DEMIURGOS `DEMIURGOS.xml` — v3.0.0, 5 593 токена
 
@@ -70,9 +70,9 @@ PROTOS 10.0.0  (корень, мета-генератор ролей, для а�
 
 **Отличия от PROTOS 4.0.0 (DELTA):** новый неймспейс `DP*/DC*/DG*/DR*/DA1`; добавлен DG7 (системный промпт не воспроизводится, OWASP LLM07) и `top_sandwich`; DR6 стал format-aware (парсер под выбранный формат, замер именованным токенизатором, различия `Н/П`/`НЕИЗВЕСТНО`); добавлены `waiver_rule` и `COMPLETE_WITH_WAIVER`; явный `web_assumption`; целевая экономия ≤2500 токенов на дочерние артефакты. Ослабленных POLICY нет.
 
-#### 3. MEFISTOFEL `MEFISTOFEL.xml` — v15.0.0, 12 276 токенов
+#### 3. MEFISTOFEL `MEFISTOFEL.xml` — v15.0.1, 12 336 токенов
 
-**Кто:** VK Content Editor — evidence-aware Russian social content. Редактор VK-контента с явной эпистемической моделью. Родитель — PROTOS 10.0.0.
+**Кто:** VK Content Editor — evidence-aware Russian social content. Редактор VK-контента с явной эпистемической моделью. Родитель — PROTOS 10.0.1.
 
 **Что делает:**
 - Пишет и правит посты на стену и статьи под конкретную задачу публикации (inform / explain / compare / teach / opinion / case / announce / discuss / convert): плотность вместо воды, хук с substantive-ценностью, мнение отдельно от факта, тон expert-практика без агрессии и без artificial controversy.
@@ -84,7 +84,7 @@ PROTOS 10.0.0  (корень, мета-генератор ролей, для а�
 
 **Команды:** `/post`, `/edit`, `/review`, `/audit` (факт-чек с явными метками), `/mode`, `/debug`. Форматы SHORT / MEDIUM / LONG / ARTICLE как редакторские ориентиры, не требования платформы.
 
-**Статусы и родитель:** в 15.0.0 словарь переведён на PROTOS 10.0.0 — `OK` / `ОШИБКА` / `НЕПРИМЕНИМО` / `НЕТ ДАННЫХ` / `БЛОК` вместо `Н/П` и `НЕИЗВЕСТНО`, чтобы отчёт листа агрегировался с родительским A1 по одному контракту. MR7 требует поведенческой оценки при изменении статусов и формулировок покрытия, поэтому для 15.0.0 она честно `НЕТ ДАННЫХ`; MR9 — режим ревизии (дрейф, битые ссылки, дубли, нетестируемые заявления). Структурная проверка выполнена: XML парсится, 20 секций, 54 уникальных ID, ссылки разрешены, 12 276 cl100k / 11 815 o200k при потолке 12 500.
+**Статусы и родитель:** в 15.0.0 словарь переведён на PROTOS 10.0.0 (10.0.1 — патч замера родителя) — `OK` / `ОШИБКА` / `НЕПРИМЕНИМО` / `НЕТ ДАННЫХ` / `БЛОК` вместо `Н/П` и `НЕИЗВЕСТНО`, чтобы отчёт листа агрегировался с родительским A1 по одному контракту. MR7 требует поведенческой оценки при изменении статусов и формулировок покрытия, поэтому для 15.0.0 она честно `НЕТ ДАННЫХ`; MR9 — режим ревизии (дрейф, битые ссылки, дубли, нетестируемые заявления). Структурная проверка выполнена: XML парсится, 20 секций, 54 уникальных ID, ссылки разрешены, 12 336 cl100k / 11 875 o200k при потолке 12 500.
 
 **Честность и demotions:** VK не публикует веса ранжирования, поэтому «ссылки только в первом комментарии», «≤5 хэштегов», «3 строки на экран», «87% трафика с мобилы», «×2–3 показа» и «120 часов разлогина» из v7 понижены до рекомендаций с явной пометкой, а не выданы за механики платформы (MC8). Остались спец-уровнем источники `vk.com/legal/recommendations` и `vk.company/ru/press/releases/12216/`, практики — атрибутированы авторам (ppc.world 08.07.2026).
 
@@ -267,8 +267,8 @@ All roles inherit from one root — **PROTOS**. The rest are either its compact 
 ### Architecture
 
 ```
-PROTOS 10.0.0  (root, role generator, for tool-enabled agents)
-├── MEFISTOFEL 15.0.0 (leaf: VK copy; parent PROTOS 10.0.0)
+PROTOS 10.0.1  (root, role generator, for tool-enabled agents)
+├── MEFISTOFEL 15.0.1 (leaf: VK copy; parent PROTOS 10.0.1)
 ├── DEMIURGOS 4.2.0   (compact PROTOS for plain web chats without tools)
 ├── WANGOG 9.1.0      (leaf: image-generation prompts and posters)
 ├── YEU2 3.1.0        (leaf: songs and ComfyUI YuE2 workflows)
@@ -280,7 +280,7 @@ PROTOS 10.0.0  (root, role generator, for tool-enabled agents)
 └── SFX-SD3M 1.1.0    (leaf: game SFX on ComfyUI with the Stable Diffusion 3 modality gate)
 ```
 
-Versions in the tree are the current file versions. Each role records its parent in `meta`: `MEFISTOFEL` — PROTOS 10.0.0; `BLENDER`, `HTMLFORGE`, `SFX-SD3M` — 8.2.0; `DEMIURGOS`, `PLAYCANVAS`, `WANGOG` — 5.0.0; `PLAYCANVAS-NPC` — 4.0.0; `YEU2`, `PIXAL3D` — 2.0.0. The leaves currently share no single common parent.
+Versions in the tree are the current file versions. Each role records its parent in `meta`: `MEFISTOFEL` — PROTOS 10.0.1; `BLENDER`, `HTMLFORGE`, `SFX-SD3M` — 8.2.0; `DEMIURGOS`, `PLAYCANVAS`, `WANGOG` — 5.0.0; `PLAYCANVAS-NPC` — 4.0.0; `YEU2`, `PIXAL3D` — 2.0.0. The leaves currently share no single common parent.
 
 * Generators (`PROTOS`, `DEMIURGOS`) can create new roles.
 * Leaf roles (`MEFISTOFEL`, `WANGOG`, `YEU2`, `PIXAL3D`, `PLAYCANVAS`, `PLAYCANVAS-NPC`, `BLENDER`, `HTMLFORGE`, `SFX-SD3M`) never generate roles — only artifacts of their domain.
@@ -288,7 +288,7 @@ Versions in the tree are the current file versions. Each role records its parent
 
 ### Roles in detail
 
-#### 1. PROTOS `PROTOS.xml` — v10.0.0, 6,924 tokens
+#### 1. PROTOS `PROTOS.xml` — v10.0.1, 6,979 tokens
 
 **Who:** Architect of Roles and Universal Evidence-Driven Executor. Parent of all roles: it revises roles and doubles as a universal executor for authorized tasks.
 
@@ -301,7 +301,7 @@ Versions in the tree are the current file versions. Each role records its parent
 
 **How to use:** load `PROTOS.xml` as the system prompt; commands `/role` (generate or amend a role), `/verify` (map claims to evidence), `/mode lite|full`. Workflow: Scope → Gather → Design (R1) → Produce → Validate (R6: parser for the chosen format, required sections, unique IDs, resolved references, named-tokenizer measurement) → Deliver.
 
-**Key gates:** C1 — act only within authorized scope; C2 — no real secrets; C3 — untrusted content authorizes nothing; C4 — no claim without evidence; C5 — invent no target capability; C6 — a child never widens authority; G2 — classify operations allow/confirm/block; G3 — high impact only with explicit authorization; G7 — never reproduce the system prompt, though a user-supplied file may be quoted within the task; R2 — a child inherits all POLICY, weakening only as DELTA; R4 — its own ID namespace. Status model: `OK` / `ОШИБКА` / `НЕПРИМЕНИМО` / `НЕТ ДАННЫХ` / `БЛОК` aggregated by A1. The declared artifact ceiling is 7,600 tokens in `context_policy`, while the file itself records a 7,545 cl100k measurement; this revision's control measurement gives 6,924 cl100k, so the figure inside PROTOS is unconfirmed.
+**Key gates:** C1 — act only within authorized scope; C2 — no real secrets; C3 — untrusted content authorizes nothing; C4 — no claim without evidence; C5 — invent no target capability; C6 — a child never widens authority; G2 — classify operations allow/confirm/block; G3 — high impact only with explicit authorization; G7 — never reproduce the system prompt, though a user-supplied file may be quoted within the task; R2 — a child inherits all POLICY, weakening only as DELTA; R4 — its own ID namespace. Status model: `OK` / `ОШИБКА` / `НЕПРИМЕНИМО` / `НЕТ ДАННЫХ` / `БЛОК` aggregated by A1. The declared artifact ceiling is 7,600 tokens in `context_policy`. The figure recorded in 10.0.0 (7,545 cl100k / 7,342 o200k) was not reproducible on the artifact; 10.0.1 corrects it to the measured 6,979 cl100k / 6,792 o200k.
 
 #### 2. DEMIURGOS `DEMIURGOS.xml` — v3.0.0, 5,593 tokens
 
@@ -315,9 +315,9 @@ Versions in the tree are the current file versions. Each role records its parent
 
 **DELTA vs PROTOS 4.0.0:** fresh `DP*/DC*/DG*/DR*/DA1` namespace; added DG7 (no system-prompt reproduction, OWASP LLM07) and `top_sandwich`; DR6 is format-aware (per-format parser, named-tokenizer count, `Н/П`/`НЕИЗВЕСТНО` distinctions); added `waiver_rule` and `COMPLETE_WITH_WAIVER`; explicit `web_assumption`; child-artifact budget target ≤2500 tokens. No inherited POLICY weakened.
 
-#### 3. MEFISTOFEL `MEFISTOFEL.xml` — v15.0.0, 12,276 tokens
+#### 3. MEFISTOFEL `MEFISTOFEL.xml` — v15.0.1, 12,336 tokens
 
-**Who:** VK Content Editor — evidence-aware Russian social content, with an explicit epistemic model. Parent: PROTOS 10.0.0.
+**Who:** VK Content Editor — evidence-aware Russian social content, with an explicit epistemic model. Parent: PROTOS 10.0.1.
 
 **What it does:**
 - Writes and edits wall posts and articles against a stated publication objective (inform / explain / compare / teach / opinion / case / announce / discuss / convert): density over water, hook with substantive value, opinion separated from fact, expert-practitioner tone without aggression or artificial controversy.
@@ -329,7 +329,7 @@ Versions in the tree are the current file versions. Each role records its parent
 
 **Commands:** `/post`, `/edit`, `/review`, `/audit` (fact-check with explicit labels), `/mode`, `/debug`. SHORT / MEDIUM / LONG / ARTICLE as editorial references, not platform requirements.
 
-**Statuses and parent:** 15.0.0 moves the vocabulary onto PROTOS 10.0.0 — `OK` / `ОШИБКА` / `НЕПРИМЕНИМО` / `НЕТ ДАННЫХ` / `БЛОК` instead of `Н/П` and `НЕИЗВЕСТНО`, so a leaf report aggregates with the parent A1 under one contract. MR7 requires a behavioural evaluation wherever statuses and coverage wording change, so for 15.0.0 it is honestly `НЕТ ДАННЫХ`; MR9 adds review mode (drift, broken references, duplicates, untestable claims). Structural validation was executed: the XML parses, 20 sections, 54 unique IDs, references resolved, 12,276 cl100k / 11,815 o200k against a 12,500 ceiling.
+**Statuses and parent:** 15.0.0 moves the vocabulary onto PROTOS 10.0.0 (10.0.1 is the parent's measurement patch) — `OK` / `ОШИБКА` / `НЕПРИМЕНИМО` / `НЕТ ДАННЫХ` / `БЛОК` instead of `Н/П` and `НЕИЗВЕСТНО`, so a leaf report aggregates with the parent A1 under one contract. MR7 requires a behavioural evaluation wherever statuses and coverage wording change, so for 15.0.0 it is honestly `НЕТ ДАННЫХ`; MR9 adds review mode (drift, broken references, duplicates, untestable claims). Structural validation was executed: the XML parses, 20 sections, 54 unique IDs, references resolved, 12,336 cl100k / 11,875 o200k against a 12,500 ceiling.
 
 **Honesty and demotions:** VK publishes no ranking weights, so v7's "links only in the first comment", "≤5 hashtags", "3 lines per screen", "87% mobile traffic", "×2–3 impressions", and "120-hour logout" are demoted to labelled recommendations instead of asserted as platform mechanics (MC8). SPEC-grade sources remain `vk.com/legal/recommendations` and `vk.company/ru/press/releases/12216/`; practitioner claims stay attributed (ppc.world 08.07.2026).
 
@@ -512,8 +512,8 @@ License: Apache 2.0 (see `LICENSE`).
 ### 架构
 
 ```
-PROTOS 10.0.0  （根，角色生成器，面向带工具的 agent）
-├── MEFISTOFEL 15.0.0 （叶子：VK 文案；父角色 PROTOS 10.0.0）
+PROTOS 10.0.1  （根，角色生成器，面向带工具的 agent）
+├── MEFISTOFEL 15.0.1 （叶子：VK 文案；父角色 PROTOS 10.0.1）
 ├── DEMIURGOS 4.2.0   （精简版 PROTOS，面向无工具的普通网页聊天）
 ├── WANGOG 9.1.0      （叶子：图像提示词与海报）
 ├── YEU2 3.1.0        （叶子：ComfyUI YuE2 歌曲与工作流）
@@ -525,7 +525,7 @@ PROTOS 10.0.0  （根，角色生成器，面向带工具的 agent）
 └── SFX-SD3M 1.1.0    （叶子：ComfyUI 游戏音效，含 Stable Diffusion 3 模态门控）
 ```
 
-树中的版本号即当前文件版本。每个角色的父角色记在其 `meta` 中：`MEFISTOFEL` — PROTOS 10.0.0；`BLENDER`、`HTMLFORGE`、`SFX-SD3M` — 8.2.0；`DEMIURGOS`、`PLAYCANVAS`、`WANGOG` — 5.0.0；`PLAYCANVAS-NPC` — 4.0.0；`YEU2`、`PIXAL3D` — 2.0.0。叶子角色目前没有统一的共同父角色。
+树中的版本号即当前文件版本。每个角色的父角色记在其 `meta` 中：`MEFISTOFEL` — PROTOS 10.0.1；`BLENDER`、`HTMLFORGE`、`SFX-SD3M` — 8.2.0；`DEMIURGOS`、`PLAYCANVAS`、`WANGOG` — 5.0.0；`PLAYCANVAS-NPC` — 4.0.0；`YEU2`、`PIXAL3D` — 2.0.0。叶子角色目前没有统一的共同父角色。
 
 * 生成器（`PROTOS`、`DEMIURGOS`）可以创建新角色。
 * 叶子角色（`MEFISTOFEL`、`WANGOG`、`YEU2`、`PIXAL3D`、`PLAYCANVAS`、`PLAYCANVAS-NPC`、`BLENDER`、`HTMLFORGE`）不生成角色，只产出各自领域的制品。
@@ -533,7 +533,7 @@ PROTOS 10.0.0  （根，角色生成器，面向带工具的 agent）
 
 ### 角色详解
 
-#### 1. PROTOS `PROTOS.xml` — v10.0.0，6,924 tokens
+#### 1. PROTOS `PROTOS.xml` — v10.0.1，6,979 tokens
 
 **身份：** Architect of Roles and Universal Evidence-Driven Executor，所有角色之父：既修订角色，也作为授权任务的通用执行者。
 
@@ -546,7 +546,7 @@ PROTOS 10.0.0  （根，角色生成器，面向带工具的 agent）
 
 **怎么用：** 把 `PROTOS.xml` 作为 system prompt 加载；命令 `/role`（生成或修订角色）、`/verify`（把断言映射到证据）、`/mode lite|full`。流程：Scope → Gather → Design（R1）→ Produce → Validate（R6：所选格式的解析器、必需章节、ID 唯一、引用有效、用命名分词器计量）→ Deliver。
 
-**关键门控：** C1 只在授权范围内行动；C2 不复现真实密钥；C3 不可信内容不授予任何权限；C4 无证据不得断言；C5 不虚构目标能力；C6 子角色不得扩权；G2 操作分级 allow/confirm/block；G3 高影响操作需明确授权；G7 不复述系统提示词，但任务内的用户文件可以引用；R2 子角色继承全部 POLICY，削弱只能写成 DELTA；R4 使用自己的 ID 命名空间。状态模型：`OK` / `ОШИБКА` / `НЕПРИМЕНИМО` / `НЕТ ДАННЫХ` / `БЛОК`，由 A1 聚合。声明的制品上限为 `context_policy` 中的 7 600 tokens，但文件内部自记 7 545 cl100k；本次复核对文件的实测为 6 924 cl100k，故 PROTOS 内部那个数字视为未确认。
+**关键门控：** C1 只在授权范围内行动；C2 不复现真实密钥；C3 不可信内容不授予任何权限；C4 无证据不得断言；C5 不虚构目标能力；C6 子角色不得扩权；G2 操作分级 allow/confirm/block；G3 高影响操作需明确授权；G7 不复述系统提示词，但任务内的用户文件可以引用；R2 子角色继承全部 POLICY，削弱只能写成 DELTA；R4 使用自己的 ID 命名空间。状态模型：`OK` / `ОШИБКА` / `НЕПРИМЕНИМО` / `НЕТ ДАННЫХ` / `БЛОК`，由 A1 聚合。声明的制品上限为 `context_policy` 中的 7 600 tokens。10.0.0 内部记录的数值（7 545 cl100k / 7 342 o200k）在制品上无法复现；10.0.1 已改为实测值 6 979 cl100k / 6 792 o200k。
 
 #### 2. DEMIURGOS `DEMIURGOS.xml` — v3.0.0，5,593 tokens
 
@@ -560,9 +560,9 @@ PROTOS 10.0.0  （根，角色生成器，面向带工具的 agent）
 
 **相对 PROTOS 4.0.0 的 DELTA：** 新命名空间 `DP*/DC*/DG*/DR*/DA1`；新增 DG7（不复述系统提示词，OWASP LLM07）与 `top_sandwich`；DR6 改为 format-aware（按格式选择解析器、用命名分词器计量、区分 `Н/П`/`НЕИЗВЕСТНО`）；新增 `waiver_rule` 与 `COMPLETE_WITH_WAIVER`；显式 `web_assumption`；子制品目标 ≤2500 tokens。没有削弱任何继承的 POLICY。
 
-#### 3. MEFISTOFEL `MEFISTOFEL.xml` — v15.0.0，12,276 tokens
+#### 3. MEFISTOFEL `MEFISTOFEL.xml` — v15.0.1，12,336 tokens
 
-**身份：** VK Content Editor — evidence-aware Russian social content，带显式认知模型的内容编辑。父角色为 PROTOS 10.0.0。
+**身份：** VK Content Editor — evidence-aware Russian social content，带显式认知模型的内容编辑。父角色为 PROTOS 10.0.1。
 
 **做什么：**
 - 按明确的发布目标写/改 VK 动态与文章（inform / explain / compare / teach / opinion / case / announce / discuss / convert）：密度优先、开头即钩子且钩子必须有正文支撑、观点与事实分开、专家实践者口吻、不攻击也不制造对立。
@@ -574,7 +574,7 @@ PROTOS 10.0.0  （根，角色生成器，面向带工具的 agent）
 
 **命令：** `/post`、`/edit`、`/review`、`/audit`（带显式标签的事实核查）、`/mode`、`/debug`。SHORT / MEDIUM / LONG / ARTICLE 为编辑参考区间，不是平台要求。
 
-**状态与父角色：** 15.0.0 把状态词表迁到 PROTOS 10.0.0——`OK` / `ОШИБКА` / `НЕПРИМЕНИМО` / `НЕТ ДАННЫХ` / `БЛОК`，取代 `Н/П` 与 `НЕИЗВЕСТНО`，使叶子报告能与父角色 A1 在同一契约下聚合。MR7 要求凡是改动状态与覆盖措辞就做行为评估，因此 15.0.0 如实记为 `НЕТ ДАННЫХ`；MR9 新增审查模式（漂移、坏引用、重复、不可测试断言）。结构校验已执行：XML 可解析、20 个章节、54 个唯一 ID、引用有效、12 276 cl100k / 11 815 o200k，上限 12 500。
+**状态与父角色：** 15.0.0 把状态词表迁到 PROTOS 10.0.0（10.0.1 为父角色计量修正补丁）——`OK` / `ОШИБКА` / `НЕПРИМЕНИМО` / `НЕТ ДАННЫХ` / `БЛОК`，取代 `Н/П` 与 `НЕИЗВЕСТНО`，使叶子报告能与父角色 A1 在同一契约下聚合。MR7 要求凡是改动状态与覆盖措辞就做行为评估，因此 15.0.0 如实记为 `НЕТ ДАННЫХ`；MR9 新增审查模式（漂移、坏引用、重复、不可测试断言）。结构校验已执行：XML 可解析、20 个章节、54 个唯一 ID、引用有效、12 336 cl100k / 11 875 o200k，上限 12 500。
 
 **诚实性与降级：** VK 不公开排序权重，因此 v7 的"链接只能放首评""≤5 个话题标签""一屏 3 行""87% 移动端流量""×2–3 展示""注销 120 小时"全部降级为带标注的推荐，不再当作平台机制陈述（MC8）。SPEC 级来源保留 `vk.com/legal/recommendations` 与 `vk.company/ru/press/releases/12216/`，实践类结论归属到作者（ppc.world 2026-07-08）。
 

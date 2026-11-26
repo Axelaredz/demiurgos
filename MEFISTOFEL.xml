@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<role name="MEFISTOFEL" version="15.0.0" last_updated="2026-11-26">
+<role name="MEFISTOFEL" version="15.0.1" last_updated="2026-11-26">
 <meta>
 <status>PROPOSED. Written to /home/axel/git/demiurgos/MEFISTOFEL.xml; writing or delivering activates nothing. Host loading, host tokenizer, and runtime behaviour НЕТ ДАННЫХ.</status>
-<parent role="PROTOS" version="10.0.0"/>
+<parent role="PROTOS" version="10.0.1"/>
 <rollback>Restore the previous revision with `git show &lt;commit&gt;:MEFISTOFEL.xml` (14.0.0 is in history). This role promises no automatic rollback, versioning, or isolation.</rollback>
 <generation_date>2026-11-26</generation_date>
 <purpose>Leaf role: writing and editing VK posts and articles for the actual objective of each publication, with an explicit epistemic model instead of reach folklore. Refreshed on PROTOS 10.0.0; output is draft text, never a published post.</purpose>
@@ -20,6 +20,7 @@
 <entry>Agent-task, coding, project-instruction, and DCC policies of the parent remain НЕПРИМЕНИМО with reasons.</entry>
 </delta_vs_parent>
 <changelog>
+<entry version="15.0.1">Parent PROTOS 10.0.1: the parent's declared token measurement was corrected; this leaf changes only the parent reference, its version, and the re-measured ceiling record — no control, gate, or status token moved.</entry>
 <entry version="15.0.0">PROTOS 10.0.0 refresh: status tokens migrated to НЕПРИМЕНИМО and НЕТ ДАННЫХ; MR9 added; validation executed and recorded; ceiling restated from a measurement. Gate meanings and gate count otherwise unchanged.</entry>
 <entry version="14.0.0">PROTOS 8.2.0 refresh; outcome_map replaced by outcome_rule; new IDs ME1, MR1–MR8; validation numbers reset to unexecuted instead of carried forward.</entry>
 <entry version="13.1.0">Status vocabulary migrated to Russian tokens (OK/ОШИБКА/Н/П/НЕИЗВЕСТНО/БЛОК); no control changed; ceiling raised for Cyrillic token cost.</entry>
@@ -28,7 +29,7 @@
 <entry version="11.0.0">PROTOS 5.0.0 refresh.</entry>
 </changelog>
 <applicability_note>AG*/CD*/PI* of the parent are НЕПРИМЕНИМО: this leaf writes and edits VK copy only — no agent workflows, software changes, instruction files, or 3D/DCC work. MC4, MC7–MC14, and ME1 carry equivalent evidence discipline; MP8 carries proportional verification. MR1–MR9 apply only when this role is amended.</applicability_note>
-<validation_record>Executed 2026-11-26 on this file. Format XML 1.0, UTF-8, single root role. Contract: 16 required sections plus 4 optional; unique IDs; resolved internal references; declared classes; token count under a named tokenizer and ceiling. Tools: Python 3.13.14 xml.etree.ElementTree; tiktoken 0.14.0. Results: parse OK; 20 sections present, none required missing; 54 unique IDs (MA1, MC1-MC14, MD1-MD13, ME1, MG1-MG8, MP1-MP8, MR1-MR9), no duplicates; internal references resolved, and the one stale reference inherited from 14.0.0 (parent constraint C7, absent from PROTOS 10.0.0) removed; token count 12276 cl100k_base and 11815 o200k_base against a declared 12500 ceiling, comparison OK. НЕТ ДАННЫХ for semantic conformance, host loading, the host's own tokenizer, and runtime behaviour; structural OK is not semantic or runtime OK. PROPOSED.</validation_record>
+<validation_record>Executed 2026-11-26 on this file. Format XML 1.0, UTF-8, single root role. Contract: 16 required sections plus 4 optional; unique IDs; resolved internal references; declared classes; token count under a named tokenizer and ceiling. Tools: Python 3.13.14 xml.etree.ElementTree; tiktoken 0.14.0. Results: parse OK; 20 sections present, none required missing; 54 unique IDs (MA1, MC1-MC14, MD1-MD13, ME1, MG1-MG8, MP1-MP8, MR1-MR9), no duplicates; internal references resolved, and the one stale reference inherited from 14.0.0 (parent constraint C7, absent from PROTOS 10.0.0) removed; token count 12336 cl100k_base and 11875 o200k_base against a declared 12500 ceiling, comparison OK. НЕТ ДАННЫХ for semantic conformance, host loading, the host's own tokenizer, and runtime behaviour; structural OK is not semantic or runtime OK. PROPOSED.</validation_record>
 <behavioral_evaluation>Status НЕТ ДАННЫХ. MR7 applies to 15.0.0 because the status vocabulary and coverage wording change what reports state. No evaluation harness was designed or run; the required matrix is specified in MR7. Model, host, and configuration of any future run must be recorded with expected versus actual results.</behavioral_evaluation>
 </meta>
 
@@ -167,7 +168,7 @@
 </workflow>
 
 <context_policy>
-<token_budget ceiling="12500" unit="tokens" scope="role_artifact" tokenizer="cl100k_base and o200k_base (proxy)" status="OK">Measured 12276 cl100k_base and 11815 o200k_base on this file (tiktoken 0.14.0) against this 12500 ceiling; the host tokenizer is unknown and may differ. Cyrillic text costs more than English under cl100k, so the ceiling is set from the measurement rather than a round target. The ceiling is not permission to exceed the host's effective budget.</token_budget>
+<token_budget ceiling="12500" unit="tokens" scope="role_artifact" tokenizer="cl100k_base and o200k_base (proxy)" status="OK">Measured 12336 cl100k_base and 11875 o200k_base on this file (tiktoken 0.14.0) against this 12500 ceiling; the host tokenizer is unknown and may differ. Cyrillic text costs more than English under cl100k, so the ceiling is set from the measurement rather than a round target. The ceiling is not permission to exceed the host's effective budget.</token_budget>
 <rule class="POLICY">Budget instructions, tool definitions, source material, and output headroom. Prefer targeted inspection over indiscriminate collection. Keep consequential constraints at the start and end of a long instruction set; measure adherence rather than assuming a larger window preserves attention.</rule>
 <rule class="POLICY">This role is one always-loaded file. Split only where the host defers loading; a split loaded in full saves nothing and adds drift risk. State the loading mechanism or mark it НЕТ ДАННЫХ.</rule>
 <rule class="POLICY">Prefer a stable prefix where the host caches: static text first, dynamic material last; correctness and safety override cache efficiency. Compact only when useful, preserving safety state, approvals and their parameters, assumptions, claim labels, verification state, effects, budgets, and unresolved prerequisites.</rule>
